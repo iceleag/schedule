@@ -3,15 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>جدول المواعيد</title>
+  <title>Schedule | جدول المواعيد</title>
 
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
 
-  <!-- Google Fonts: Cairo -->
+  <!-- Google Fonts: Cairo & Inter -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
@@ -26,15 +26,7 @@
         extend: {
           fontFamily: {
             cairo: ['Cairo', 'sans-serif'],
-          },
-          colors: {
-            brand: {
-              dark: '#0a0d14',
-              surface: '#111726',
-              border: '#1e293b',
-              accent: '#10b981',
-              booked: '#ef4444'
-            }
+            inter: ['Inter', 'sans-serif']
           }
         }
       }
@@ -43,10 +35,15 @@
 
   <style>
     body {
-      font-family: 'Cairo', sans-serif;
       background-color: #06090e;
       color: #f1f5f9;
       -webkit-tap-highlight-color: transparent;
+    }
+    body.lang-ar {
+      font-family: 'Cairo', sans-serif;
+    }
+    body.lang-en {
+      font-family: 'Inter', sans-serif;
     }
     .custom-scrollbar::-webkit-scrollbar {
       height: 6px;
@@ -66,39 +63,48 @@
     .glow-red {
       box-shadow: 0 0 20px -5px rgba(239, 68, 68, 0.3);
     }
-    .glow-amber {
-      box-shadow: 0 0 20px -5px rgba(245, 158, 11, 0.3);
+
+    [dir="rtl"] .modal-close-btn {
+      left: 1.25rem;
+      right: auto;
+    }
+    [dir="ltr"] .modal-close-btn {
+      right: 1.25rem;
+      left: auto;
     }
   </style>
 </head>
-<body class="min-h-screen flex flex-col justify-between selection:bg-emerald-500 selection:text-white">
+<body class="min-h-screen flex flex-col justify-between selection:bg-emerald-500 selection:text-white lang-ar">
 
   <!-- Main Container -->
   <div class="w-full max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-10 flex-grow">
 
     <!-- Header Section -->
     <header class="flex flex-col sm:flex-row items-center justify-between gap-4 pb-6 border-b border-slate-800/80 mb-8">
-      <div class="flex items-center gap-3 text-center sm:text-right">
+      <div class="flex items-center gap-3 text-center sm:text-start">
         <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center shadow-lg shadow-emerald-500/20 text-slate-950 font-black text-2xl">
           <i data-lucide="calendar" class="w-6 h-6 stroke-[2.5]"></i>
         </div>
         <div>
           <h1 class="text-2xl sm:text-3xl font-black tracking-tight text-white flex items-center gap-2 justify-center sm:justify-start">
-            جدول المواعيد
-            <span id="syncStatus" class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 mr-1.5 animate-pulse"></span>
-              متصل مباشر
-            </span>
+            <span data-i18n="app_title">جدول المواعيد</span>
           </h1>
         </div>
       </div>
 
       <!-- Action Buttons -->
       <div class="flex items-center flex-wrap justify-center gap-2.5">
+        <!-- Language Switcher Toggle -->
+        <button onclick="toggleLanguage()" class="text-xs font-black px-3 py-2 rounded-xl bg-slate-900 border border-slate-700/80 text-emerald-400 hover:border-emerald-500/60 transition-all flex items-center gap-1.5 shadow-sm font-mono">
+          <i data-lucide="languages" class="w-3.5 h-3.5"></i>
+          <span id="langLabel">AR / EN</span>
+        </button>
+
+        <!-- User Status / Auth -->
         <div id="userSection" class="flex items-center gap-2"></div>
+
+        <!-- Admin Trigger Button -->
         <button id="adminToggleBtn" onclick="openAdminPinModal()" class="text-xs font-bold px-3 py-2 rounded-xl bg-slate-900 border border-slate-700/70 text-slate-300 hover:text-white hover:border-slate-500 transition-all flex items-center gap-1.5">
-          <i data-lucide="shield" class="w-3.5 h-3.5 text-amber-400"></i>
-          <span>دخول الأدمن</span>
         </button>
       </div>
     </header>
@@ -110,20 +116,20 @@
           <i data-lucide="shield-check" class="w-5 h-5"></i>
         </span>
         <div>
-          <h4 class="text-sm font-bold text-amber-100">لوحة تحكم الأدمن مفعلة</h4>
-          <p class="text-xs text-amber-300/80">تقدر تلغي أي ميعاد، تضيف أوقات، وتدير حسابات الأصحاب.</p>
+          <h4 class="text-sm font-bold text-amber-100" data-i18n="admin_panel_title">لوحة تحكم الأدمن مفعلة</h4>
+          <p class="text-xs text-amber-300/80" data-i18n="admin_panel_desc">تقدر تلغي أي ميعاد، تضيف أوقات، وتدير حسابات الأصحاب.</p>
         </div>
       </div>
       <div class="flex items-center gap-2">
         <button onclick="openManageUsersModal()" class="text-xs font-bold px-3 py-2 rounded-xl bg-slate-900 border border-amber-400/40 text-amber-300 hover:bg-amber-400 hover:text-slate-950 transition-all flex items-center gap-1.5">
           <i data-lucide="users" class="w-3.5 h-3.5"></i>
-          <span>إدارة الحسابات</span>
+          <span data-i18n="manage_users_btn">إدارة الحسابات</span>
         </button>
         <button onclick="openAddSlotModal()" class="text-xs font-bold px-3.5 py-2 rounded-xl bg-amber-500 text-slate-950 hover:bg-amber-400 transition-all flex items-center gap-1.5 font-black">
           <i data-lucide="plus-circle" class="w-4 h-4"></i>
-          <span>إضافة ميعاد لليوم</span>
+          <span data-i18n="add_slot_btn">إضافة ميعاد لليوم</span>
         </button>
-        <button onclick="logoutAdmin()" class="text-xs font-bold px-3 py-2 rounded-xl bg-slate-800 text-slate-300 hover:text-rose-400 transition-all">
+        <button onclick="logoutAdmin()" class="text-xs font-bold px-3 py-2 rounded-xl bg-slate-800 text-slate-300 hover:text-rose-400 transition-all" data-i18n="exit_btn">
           خروج
         </button>
       </div>
@@ -133,7 +139,7 @@
     <div class="mb-8">
       <div class="text-xs font-bold text-slate-400 mb-3 flex items-center gap-1.5">
         <i data-lucide="calendar-days" class="w-4 h-4 text-emerald-400"></i>
-        <span>اختر اليوم لعرض وحجز المواعيد:</span>
+        <span data-i18n="choose_day">اختر اليوم لعرض وحجز المواعيد:</span>
       </div>
       <div id="daysContainer" class="flex items-center gap-2.5 overflow-x-auto pb-4 pt-2 px-1 custom-scrollbar"></div>
     </div>
@@ -141,9 +147,7 @@
     <!-- Active Day Header -->
     <div class="flex items-center justify-between mb-5 px-1">
       <div class="flex items-center gap-2">
-        <h2 id="currentDayTitle" class="text-lg sm:text-xl font-bold text-white flex items-center gap-2">
-          مواعيد اليوم
-        </h2>
+        <h2 id="currentDayTitle" class="text-lg sm:text-xl font-bold text-white flex items-center gap-2"></h2>
       </div>
       <div id="daySummaryBadge" class="text-xs px-3 py-1 rounded-full font-bold"></div>
     </div>
@@ -156,8 +160,8 @@
       <div class="w-14 h-14 mx-auto rounded-2xl bg-slate-800/80 flex items-center justify-center text-slate-400 mb-3">
         <i data-lucide="calendar-x-2" class="w-7 h-7"></i>
       </div>
-      <h3 class="text-base font-bold text-slate-200 mb-1">لا يوجد مواعيد مضافة في هذا اليوم</h3>
-      <p class="text-xs text-slate-400">تابع الأيام التانية أو انتظر إضافة مواعيد جديدة قريباً.</p>
+      <h3 class="text-base font-bold text-slate-200 mb-1" data-i18n="no_slots_title">لا يوجد مواعيد مضافة في هذا اليوم</h3>
+      <p class="text-xs text-slate-400" data-i18n="no_slots_desc">تابع الأيام التانية أو انتظر إضافة مواعيد جديدة قريباً.</p>
     </div>
 
   </div>
@@ -165,25 +169,25 @@
   <!-- Custom Admin PIN Modal -->
   <div id="adminPinModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
     <div class="bg-slate-900 border border-slate-700/80 rounded-3xl max-w-xs w-full p-6 shadow-2xl relative text-center">
-      <button onclick="closeAdminPinModal()" class="absolute top-4 left-4 p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-all">
+      <button onclick="closeAdminPinModal()" class="modal-close-btn absolute top-5 p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-all">
         <i data-lucide="x" class="w-5 h-5"></i>
       </button>
 
       <div class="w-12 h-12 mx-auto rounded-2xl bg-amber-500/20 text-amber-400 flex items-center justify-center border border-amber-500/30 mb-3">
         <i data-lucide="shield" class="w-6 h-6"></i>
       </div>
-      <h3 class="text-base font-bold text-white mb-1">دخول الأدمن</h3>
-      <p class="text-xs text-slate-400 mb-4">أدخل الرمز السري للتحكم</p>
+      <h3 class="text-base font-bold text-white mb-1" data-i18n="admin_login_title">دخول الأدمن</h3>
+      <p class="text-xs text-slate-400 mb-4" data-i18n="admin_login_sub">أدخل الرمز السري للتحكم</p>
 
-      <input type="password" id="adminPinInput" maxlength="10" placeholder="••••" class="w-full text-center tracking-widest text-lg font-bold bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-amber-500 mb-3">
+      <input type="password" id="adminPinInput" maxlength="10" placeholder="••••" class="w-full text-center tracking-widest text-lg font-bold bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-amber-500 mb-3 font-mono">
 
-      <button onclick="submitAdminPin()" class="w-full py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-sm transition-all shadow-lg shadow-amber-500/20">
+      <button onclick="submitAdminPin()" class="w-full py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-sm transition-all shadow-lg shadow-amber-500/20" data-i18n="confirm_login">
         تأكيد الدخول
       </button>
     </div>
   </div>
 
-  <!-- Custom Confirmation Dialog Modal (Elevated z-index to always stay on top) -->
+  <!-- Custom Confirmation Dialog Modal -->
   <div id="confirmModal" class="fixed inset-0 z-[70] bg-slate-950/85 backdrop-blur-sm flex items-center justify-center p-4 hidden">
     <div class="bg-slate-900 border border-slate-700/90 rounded-3xl max-w-sm w-full p-6 shadow-2xl relative text-center">
       <div class="w-12 h-12 mx-auto rounded-2xl bg-rose-500/20 text-rose-400 flex items-center justify-center border border-rose-500/30 mb-3">
@@ -193,10 +197,10 @@
       <p id="confirmMessage" class="text-xs text-slate-400 mb-5 leading-relaxed"></p>
 
       <div class="flex items-center gap-2">
-        <button id="confirmYesBtn" class="flex-1 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs transition-all shadow-lg shadow-rose-600/20">
+        <button id="confirmYesBtn" class="flex-1 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs transition-all shadow-lg shadow-rose-600/20" data-i18n="yes_confirm">
           نعم، تأكيد
         </button>
-        <button onclick="closeConfirmModal()" class="flex-1 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs transition-all">
+        <button onclick="closeConfirmModal()" class="flex-1 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs transition-all" data-i18n="cancel">
           إلغاء
         </button>
       </div>
@@ -206,33 +210,33 @@
   <!-- Booking Modal -->
   <div id="bookingModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
     <div class="bg-slate-900 border border-slate-700/80 rounded-3xl max-w-md w-full p-6 shadow-2xl relative">
-      <button onclick="closeBookingModal()" class="absolute top-4 left-4 p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-all">
+      <button onclick="closeBookingModal()" class="modal-close-btn absolute top-5 p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-all">
         <i data-lucide="x" class="w-5 h-5"></i>
       </button>
 
-      <div class="flex items-center gap-3 mb-5">
-        <div class="w-10 h-10 rounded-2xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center border border-emerald-500/30 font-bold">
+      <div class="flex items-center gap-3 mb-5 pe-8">
+        <div class="w-10 h-10 rounded-2xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center border border-emerald-500/30 font-bold flex-shrink-0">
           <i data-lucide="calendar-plus" class="w-5 h-5"></i>
         </div>
         <div>
-          <h3 class="text-base font-bold text-white">تأكيد حجز المعاد</h3>
-          <p id="bookingModalTime" class="text-xs text-slate-400"></p>
+          <h3 class="text-base font-bold text-white" data-i18n="confirm_booking_title">تأكيد حجز المعاد</h3>
+          <p id="bookingModalTime" class="text-xs text-slate-400 font-mono"></p>
         </div>
       </div>
 
       <div class="space-y-4">
         <div>
-          <label class="block text-xs font-bold text-slate-300 mb-1.5">الحجز باسم</label>
+          <label class="block text-xs font-bold text-slate-300 mb-1.5" data-i18n="booked_by_label">الحجز باسم</label>
           <input type="text" id="bookerNameInput" disabled class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-emerald-400 font-bold opacity-90 cursor-not-allowed">
         </div>
         <div>
-          <label class="block text-xs font-bold text-slate-300 mb-1.5">ملاحظة / هنقعد فين أو نعمل إيه؟ (اختياري)</label>
+          <label class="block text-xs font-bold text-slate-300 mb-1.5" data-i18n="topic_label">ملاحظة / هنقعد فين أو نعمل إيه؟ (اختياري)</label>
           <input type="text" id="bookerTopicInput" placeholder="مثلاً: بلايستيشن، قهوة، نتمشى..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-500 transition-all">
         </div>
 
         <button onclick="confirmBooking()" class="w-full py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 text-slate-950 font-black text-sm hover:opacity-95 transition-all shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2 mt-2">
           <i data-lucide="check" class="w-4 h-4 stroke-[3]"></i>
-          <span>تأكيد الحجز فوراً</span>
+          <span data-i18n="confirm_now_btn">تأكيد الحجز فوراً</span>
         </button>
       </div>
     </div>
@@ -241,7 +245,7 @@
   <!-- User Login / Register Modal -->
   <div id="authModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
     <div class="bg-slate-900 border border-slate-700/80 rounded-3xl max-w-sm w-full p-6 shadow-2xl relative">
-      <button onclick="closeAuthModal()" class="absolute top-4 left-4 p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-all">
+      <button onclick="closeAuthModal()" class="modal-close-btn absolute top-5 p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-all">
         <i data-lucide="x" class="w-5 h-5"></i>
       </button>
 
@@ -254,18 +258,18 @@
       </div>
 
       <div class="flex p-1 bg-slate-950 rounded-xl mb-4 border border-slate-800">
-        <button id="authTabRegister" onclick="switchAuthMode('register')" class="flex-1 py-1.5 text-xs font-bold rounded-lg bg-indigo-600 text-white transition-all">حساب جديد</button>
-        <button id="authTabLogin" onclick="switchAuthMode('login')" class="flex-1 py-1.5 text-xs font-bold rounded-lg text-slate-400 hover:text-white transition-all">تسجيل دخول</button>
+        <button id="authTabRegister" onclick="switchAuthMode('register')" class="flex-1 py-1.5 text-xs font-bold rounded-lg bg-indigo-600 text-white transition-all" data-i18n="tab_new_account">حساب جديد</button>
+        <button id="authTabLogin" onclick="switchAuthMode('login')" class="flex-1 py-1.5 text-xs font-bold rounded-lg text-slate-400 hover:text-white transition-all" data-i18n="tab_login">تسجيل دخول</button>
       </div>
 
       <div class="space-y-3.5">
         <div>
-          <label class="block text-xs font-bold text-slate-300 mb-1">اسمك (اسم المستخدم)</label>
+          <label class="block text-xs font-bold text-slate-300 mb-1" data-i18n="username_label">اسم المستخدم</label>
           <input type="text" id="authUsernameInput" placeholder="اكتب اسمك هنا..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500">
         </div>
         <div>
-          <label class="block text-xs font-bold text-slate-300 mb-1">كلمة المرور (عشان محدش يدخل بـ اسمك)</label>
-          <input type="password" id="authPasswordInput" placeholder="••••••••" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500">
+          <label class="block text-xs font-bold text-slate-300 mb-1" data-i18n="password_label">كلمة المرور</label>
+          <input type="password" id="authPasswordInput" placeholder="••••••••" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500 font-mono">
         </div>
 
         <button id="authSubmitBtn" onclick="submitAuth()" class="w-full py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm transition-all shadow-lg shadow-indigo-600/20 mt-2">
@@ -278,17 +282,17 @@
   <!-- User My Bookings Modal -->
   <div id="myBookingsModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
     <div class="bg-slate-900 border border-slate-700/80 rounded-3xl max-w-md w-full p-6 shadow-2xl relative">
-      <button onclick="closeMyBookingsModal()" class="absolute top-4 left-4 p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-all">
+      <button onclick="closeMyBookingsModal()" class="modal-close-btn absolute top-5 p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-all">
         <i data-lucide="x" class="w-5 h-5"></i>
       </button>
 
-      <div class="flex items-center gap-3 mb-5">
-        <div class="w-10 h-10 rounded-2xl bg-amber-500/20 text-amber-400 flex items-center justify-center border border-amber-500/30">
+      <div class="flex items-center gap-3 mb-5 pe-8">
+        <div class="w-10 h-10 rounded-2xl bg-amber-500/20 text-amber-400 flex items-center justify-center border border-amber-500/30 flex-shrink-0">
           <i data-lucide="calendar-heart" class="w-5 h-5"></i>
         </div>
         <div>
-          <h3 class="text-base font-bold text-white">مواعيدي المحجوزة</h3>
-          <p class="text-xs text-slate-400">تقدر تلغي أي ميعاد منهم في أي وقت</p>
+          <h3 class="text-base font-bold text-white" data-i18n="my_bookings_title">مواعيدي المحجوزة</h3>
+          <p class="text-xs text-slate-400" data-i18n="my_bookings_sub">تقدر تلغي أي ميعاد منهم في أي وقت</p>
         </div>
       </div>
 
@@ -299,27 +303,27 @@
   <!-- Admin: Manage Users Modal -->
   <div id="manageUsersModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
     <div class="bg-slate-900 border border-slate-700/80 rounded-3xl max-w-lg w-full p-6 shadow-2xl relative">
-      <button onclick="closeManageUsersModal()" class="absolute top-4 left-4 p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-all">
+      <button onclick="closeManageUsersModal()" class="modal-close-btn absolute top-5 p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-all">
         <i data-lucide="x" class="w-5 h-5"></i>
       </button>
 
-      <div class="flex items-center gap-3 mb-5">
-        <div class="w-10 h-10 rounded-2xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center border border-indigo-500/30">
+      <div class="flex items-center gap-3 mb-5 pe-8">
+        <div class="w-10 h-10 rounded-2xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center border border-indigo-500/30 flex-shrink-0">
           <i data-lucide="users" class="w-5 h-5"></i>
         </div>
         <div>
-          <h3 class="text-base font-bold text-white">إدارة حسابات الأصحاب</h3>
-          <p class="text-xs text-slate-400">رؤية وإضافة وحذف المستخدمين</p>
+          <h3 class="text-base font-bold text-white" data-i18n="manage_users_header">إدارة حسابات الأصحاب</h3>
+          <p class="text-xs text-slate-400" data-i18n="manage_users_sub">رؤية وإضافة وحذف المستخدمين</p>
         </div>
       </div>
 
       <div class="p-3.5 rounded-2xl bg-slate-950 border border-slate-800 mb-4">
-        <h4 class="text-xs font-bold text-slate-300 mb-2">إضافة حساب جديد يدوياً</h4>
+        <h4 class="text-xs font-bold text-slate-300 mb-2" data-i18n="add_user_manual">إضافة حساب جديد يدوياً</h4>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-2">
           <input type="text" id="adminNewUser" placeholder="اسم المستخدم" class="bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500">
           <input type="text" id="adminNewPass" placeholder="كلمة المرور" class="bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500">
         </div>
-        <button onclick="adminAddUser()" class="w-full py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs transition-all">
+        <button onclick="adminAddUser()" class="w-full py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs transition-all" data-i18n="add_account_btn">
           إضافة الحساب
         </button>
       </div>
@@ -331,26 +335,52 @@
   <!-- Admin: Add New Slot Modal -->
   <div id="addSlotModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
     <div class="bg-slate-900 border border-slate-700/80 rounded-3xl max-w-sm w-full p-6 shadow-2xl relative">
-      <button onclick="closeAddSlotModal()" class="absolute top-4 left-4 p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-all">
+      <button onclick="closeAddSlotModal()" class="modal-close-btn absolute top-5 p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-all">
         <i data-lucide="x" class="w-5 h-5"></i>
       </button>
 
-      <div class="flex items-center gap-3 mb-4">
-        <div class="w-10 h-10 rounded-2xl bg-amber-500/20 text-amber-400 flex items-center justify-center border border-amber-500/30">
+      <div class="flex items-center gap-3 mb-4 pe-8">
+        <div class="w-10 h-10 rounded-2xl bg-amber-500/20 text-amber-400 flex items-center justify-center border border-amber-500/30 flex-shrink-0">
           <i data-lucide="clock-plus" class="w-5 h-5"></i>
         </div>
         <div>
-          <h3 class="text-base font-bold text-white">إضافة معاد جديد</h3>
+          <h3 class="text-base font-bold text-white" data-i18n="add_new_slot_header">إضافة معاد جديد</h3>
           <p id="addSlotDayLabel" class="text-xs text-slate-400"></p>
         </div>
       </div>
 
+      <div class="flex p-1 bg-slate-950 rounded-xl mb-3 border border-slate-800 text-xs font-bold">
+        <button id="slotModePickerBtn" onclick="switchSlotInputMode('picker')" class="flex-1 py-1.5 rounded-lg bg-amber-500 text-slate-950 transition-all" data-i18n="mode_picker">
+          منبه / محدد الوقت
+        </button>
+        <button id="slotModeManualBtn" onclick="switchSlotInputMode('manual')" class="flex-1 py-1.5 rounded-lg text-slate-400 hover:text-white transition-all" data-i18n="mode_manual">
+          كتابة يدوي
+        </button>
+      </div>
+
       <div class="space-y-3">
-        <div>
-          <label class="block text-xs font-bold text-slate-300 mb-1">وقت الميعاد (مثلاً: 6:00 م - 8:30 م)</label>
+        <div id="slotPickerSection" class="space-y-2.5">
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="block text-[11px] font-bold text-slate-400 mb-1" data-i18n="time_from">من الساعة:</label>
+              <input type="time" id="slotPickerStart" value="18:00" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-2.5 py-2 text-sm text-white focus:outline-none focus:border-amber-500 font-mono">
+            </div>
+            <div>
+              <label class="block text-[11px] font-bold text-slate-400 mb-1" data-i18n="time_to">إلى الساعة:</label>
+              <input type="time" id="slotPickerEnd" value="20:30" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-2.5 py-2 text-sm text-white focus:outline-none focus:border-amber-500 font-mono">
+            </div>
+          </div>
+          <p class="text-[11px] text-amber-300/80 bg-amber-500/10 p-2 rounded-xl border border-amber-500/20" data-i18n="picker_hint">
+            💡 الاختيار من هنا بيظبط الميعاد أوتوماتيك لـ Google Calendar بدون أي أخطاء.
+          </p>
+        </div>
+
+        <div id="slotManualSection" class="hidden">
+          <label class="block text-xs font-bold text-slate-300 mb-1" data-i18n="manual_slot_label">اكتب الميعاد كما تحب:</label>
           <input type="text" id="newSlotTimeInput" placeholder="7:00 م - 9:00 م" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-amber-500">
         </div>
-        <button onclick="adminSaveNewSlot()" class="w-full py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-sm transition-all">
+
+        <button onclick="adminSaveNewSlot()" class="w-full py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-sm transition-all" data-i18n="save_slot_btn">
           إضافة للجدول فوراً
         </button>
       </div>
@@ -358,7 +388,7 @@
   </div>
 
   <!-- Notification Toast -->
-  <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-slate-900/95 border border-slate-700/90 text-white px-5 py-3 rounded-2xl shadow-2xl backdrop-blur flex items-center gap-2.5 text-xs font-bold opacity-0 pointer-events-none transition-all duration-300">
+  <div id="toast" class="fixed bottom-6 start-1/2 -translate-x-1/2 z-50 bg-slate-900/95 border border-slate-700/90 text-white px-5 py-3 rounded-2xl shadow-2xl backdrop-blur flex items-center gap-2.5 text-xs font-bold opacity-0 pointer-events-none transition-all duration-300">
     <span id="toastIcon"></span>
     <span id="toastMsg"></span>
   </div>
@@ -381,6 +411,9 @@
     const ADMIN_PIN = "3276";
     let isAdmin = false;
     let currentUser = JSON.parse(localStorage.getItem('schedule_current_user') || 'null');
+    let currentLang = localStorage.getItem('schedule_lang') || 'ar';
+    let slotInputMode = 'picker';
+
     let activeDayIndex = 0;
     let selectedSlotId = null;
     let selectedSlotTime = null;
@@ -388,12 +421,231 @@
     let authMode = 'register';
     let onConfirmCallback = null;
 
+    const translations = {
+      ar: {
+        app_title: "جدول المواعيد",
+        admin_btn_login: "دخول الأدمن",
+        admin_btn_close: "إغلاق الأدمن",
+        admin_panel_title: "لوحة تحكم الأدمن مفعلة",
+        admin_panel_desc: "تقدر تلغي أي ميعاد، تضيف أوقات، وتدير حسابات الأصحاب.",
+        manage_users_btn: "إدارة الحسابات",
+        add_slot_btn: "إضافة ميعاد لليوم",
+        exit_btn: "خروج",
+        choose_day: "اختر اليوم لعرض وحجز المواعيد:",
+        today: "اليوم",
+        no_slots: "لا يوجد معاد",
+        completed: "مكتمل",
+        avail: "متاح",
+        no_slots_title: "لا يوجد مواعيد مضافة في هذا اليوم",
+        no_slots_desc: "تابع الأيام التانية أو انتظر إضافة مواعيد جديدة قريباً.",
+        admin_login_title: "دخول الأدمن",
+        admin_login_sub: "أدخل الرمز السري للتحكم",
+        confirm_login: "تأكيد الدخول",
+        yes_confirm: "نعم، تأكيد",
+        cancel: "إلغاء",
+        confirm_booking_title: "تأكيد حجز المعاد",
+        booked_by_label: "الحجز باسم",
+        topic_label: "ملاحظة / هنقعد فين أو نعمل إيه؟ (اختياري)",
+        confirm_now_btn: "تأكيد الحجز فوراً",
+        tab_new_account: "حساب جديد",
+        tab_login: "تسجيل دخول",
+        username_label: "اسم المستخدم",
+        password_label: "كلمة المرور",
+        my_bookings_title: "مواعيدي المحجوزة",
+        my_bookings_sub: "تقدر تلغي أي ميعاد منهم في أي وقت",
+        manage_users_header: "إدارة حسابات الأصحاب",
+        manage_users_sub: "رؤية وإضافة وحذف المستخدمين",
+        add_user_manual: "إضافة حساب جديد يدوياً",
+        add_account_btn: "إضافة الحساب",
+        add_new_slot_header: "إضافة معاد جديد",
+        mode_picker: "منبه / محدد الوقت",
+        mode_manual: "كتابة يدوي",
+        time_from: "من الساعة:",
+        time_to: "إلى الساعة:",
+        picker_hint: "💡 الاختيار من هنا بيظبط الميعاد أوتوماتيك لـ Google Calendar بدون أي أخطاء.",
+        manual_slot_label: "اكتب الميعاد كما تحب:",
+        save_slot_btn: "إضافة للجدول فوراً",
+        my_booking_badge: "حجزك أنت",
+        my_booking_title: "معادك محجوز بنجاح",
+        cancel_my_booking: "إلغاء حجزي",
+        booked_badge: "محجوز",
+        booked_title: "المعاد ده محجوز بالفعل",
+        booked_locked_btn: "المعاد مقفول خلاص",
+        available_badge: "متاح",
+        available_title: "معاد متاح",
+        book_with_me: "احجز المعاد ده معايا",
+        admin_data_badge: "بيانات الأدمن:",
+        booker_name_str: "الحاجز",
+        topic_str: "التوبيك",
+        admin_free_btn: "إلغاء وتفريغ المعاد",
+        add_to_calendar_btn: "إضافة لتقويم جوجل",
+        login_to_book_msg: "لازم تعمل حساب الأول عشان تقدر تحجز وتلغي بنفسك",
+        day_slots_title: "مواعيد",
+        all_booked: "جميع المواعيد محجوزة",
+        avail_count_str: "مواعيد متاحة"
+      },
+      en: {
+        app_title: "Meetup Schedule",
+        admin_btn_login: "Admin Login",
+        admin_btn_close: "Close Admin",
+        admin_panel_title: "Admin Panel Active",
+        admin_panel_desc: "Manage slots, cancel bookings, and handle friend accounts.",
+        manage_users_btn: "Manage Accounts",
+        add_slot_btn: "Add Slot for Today",
+        exit_btn: "Logout",
+        choose_day: "Select a day to view and book slots:",
+        today: "Today",
+        no_slots: "No Slots",
+        completed: "Full",
+        avail: "Open",
+        no_slots_title: "No appointments scheduled for this day",
+        no_slots_desc: "Check other upcoming days or wait for new slots.",
+        admin_login_title: "Admin Access",
+        admin_login_sub: "Enter secret PIN to proceed",
+        confirm_login: "Confirm Access",
+        yes_confirm: "Yes, Confirm",
+        cancel: "Cancel",
+        confirm_booking_title: "Confirm Appointment",
+        booked_by_label: "Booking For",
+        topic_label: "Note / Activity / Location (Optional)",
+        confirm_now_btn: "Confirm Booking Now",
+        tab_new_account: "Sign Up",
+        tab_login: "Sign In",
+        username_label: "Username",
+        password_label: "Password",
+        my_bookings_title: "My Appointments",
+        my_bookings_sub: "You can cancel your bookings here anytime",
+        manage_users_header: "Manage User Accounts",
+        manage_users_sub: "View, create, and remove user accounts",
+        add_user_manual: "Create Account Manually",
+        add_account_btn: "Add Account",
+        add_new_slot_header: "Add New Slot",
+        mode_picker: "Time Picker",
+        mode_manual: "Manual Entry",
+        time_from: "Start Time:",
+        time_to: "End Time:",
+        picker_hint: "💡 Picking formatted time automatically calibrates Google Calendar sync.",
+        manual_slot_label: "Custom slot label:",
+        save_slot_btn: "Add to Schedule",
+        my_booking_badge: "Your Slot",
+        my_booking_title: "Booked Successfully",
+        cancel_my_booking: "Cancel My Booking",
+        booked_badge: "Booked",
+        booked_title: "Slot Already Taken",
+        booked_locked_btn: "Slot is Closed",
+        available_badge: "Available",
+        available_title: "Available Slot",
+        book_with_me: "Book This Slot With Me",
+        admin_data_badge: "Admin Details:",
+        booker_name_str: "Booker",
+        topic_str: "Topic",
+        admin_free_btn: "Free Up Slot",
+        add_to_calendar_btn: "Add to Google Calendar",
+        login_to_book_msg: "Please create an account first to book and manage slots",
+        day_slots_title: "Schedule for",
+        all_booked: "All slots are booked",
+        avail_count_str: "available slots"
+      }
+    };
+
     const arabicDays = ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
+    const englishDays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
     let appData = {
       slots: {},
       users: {}
     };
+
+    function t(key) {
+      return translations[currentLang][key] || key;
+    }
+
+    function formatTimeForDisplay(timeStr) {
+      if (!timeStr) return '';
+      if (currentLang === 'ar') {
+        return timeStr
+          .replace(/PM/gi, 'م')
+          .replace(/AM/gi, 'ص');
+      } else {
+        return timeStr
+          .replace(/م/g, 'PM')
+          .replace(/ص/g, 'AM');
+      }
+    }
+
+    function getSlotSortValue(slot) {
+      if (slot.startTime && slot.startTime.includes(':')) {
+        const [h, m] = slot.startTime.split(':').map(Number);
+        return h * 60 + m;
+      }
+      if (slot.time) {
+        const matches = slot.time.match(/(\d{1,2}):(\d{2})/);
+        if (matches) {
+          let h = parseInt(matches[1], 10);
+          const m = parseInt(matches[2], 10);
+          const isPm = slot.time.includes('م') || slot.time.toUpperCase().includes('PM');
+          if (isPm && h < 12) h += 12;
+          if (!isPm && h === 12) h = 0;
+          return h * 60 + m;
+        }
+      }
+      return 9999;
+    }
+
+    function renderAdminButton() {
+      const btn = document.getElementById('adminToggleBtn');
+      if (!btn) return;
+      if (isAdmin) {
+        btn.innerHTML = `
+          <i data-lucide="shield-off" class="w-3.5 h-3.5 text-rose-400"></i>
+          <span>${t('admin_btn_close')}</span>
+        `;
+      } else {
+        btn.innerHTML = `
+          <i data-lucide="shield" class="w-3.5 h-3.5 text-amber-400"></i>
+          <span>${t('admin_btn_login')}</span>
+        `;
+      }
+      lucide.createIcons();
+    }
+
+    function toggleLanguage() {
+      currentLang = currentLang === 'ar' ? 'en' : 'ar';
+      localStorage.setItem('schedule_lang', currentLang);
+      applyLanguageSettings();
+      renderUI();
+    }
+
+    function applyLanguageSettings() {
+      const isAr = currentLang === 'ar';
+      document.documentElement.lang = currentLang;
+      document.documentElement.dir = isAr ? 'rtl' : 'ltr';
+      document.body.className = isAr 
+        ? "min-h-screen flex flex-col justify-between selection:bg-emerald-500 selection:text-white lang-ar" 
+        : "min-h-screen flex flex-col justify-between selection:bg-emerald-500 selection:text-white lang-en";
+
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        const k = el.getAttribute('data-i18n');
+        if (translations[currentLang][k]) {
+          el.textContent = translations[currentLang][k];
+        }
+      });
+
+      const userInput = document.getElementById('authUsernameInput');
+      const topicInput = document.getElementById('bookerTopicInput');
+      const adminUser = document.getElementById('adminNewUser');
+      const adminPass = document.getElementById('adminNewPass');
+      const manualSlot = document.getElementById('newSlotTimeInput');
+
+      if (userInput) userInput.placeholder = isAr ? 'اكتب اسمك هنا...' : 'Enter your name or username...';
+      if (topicInput) topicInput.placeholder = isAr ? 'مثلاً: بلايستيشن، قهوة، نتمشى...' : 'e.g., PS5 gaming, coffee, hanging out...';
+      if (adminUser) adminUser.placeholder = isAr ? 'اسم المستخدم' : 'Username';
+      if (adminPass) adminPass.placeholder = isAr ? 'كلمة المرور' : 'Password';
+      if (manualSlot) manualSlot.placeholder = isAr ? '7:00 م - 9:00 م' : '7:00 PM - 9:00 PM';
+      
+      renderAdminButton();
+      switchAuthMode(authMode);
+    }
 
     function getUpcomingWeek() {
       const week = [];
@@ -401,17 +653,17 @@
       for (let i = 0; i < 7; i++) {
         const d = new Date(today);
         d.setDate(today.getDate() + i);
-        const dayName = arabicDays[d.getDay()];
+        const dayName = currentLang === 'ar' ? arabicDays[d.getDay()] : englishDays[d.getDay()];
         const dayNumber = d.getDate();
         const monthNumber = d.getMonth() + 1;
         const formattedDate = `${dayNumber}/${monthNumber}`;
         const key = `${d.getFullYear()}-${String(monthNumber).padStart(2, '0')}-${String(dayNumber).padStart(2, '0')}`;
-        week.push({ key, dayName, dateStr: formattedDate, isToday: i === 0 });
+        week.push({ key, dayName, dateStr: formattedDate, isToday: i === 0, dateObj: d });
       }
       return week;
     }
 
-    const weekDays = getUpcomingWeek();
+    let weekDays = getUpcomingWeek();
 
     function setupFirebaseSync() {
       db.ref('slots').on('value', (snapshot) => {
@@ -437,8 +689,8 @@
         const dayKey = day.key;
         if (index < 3) {
           initialSlots[dayKey] = {
-            slot_1: { id: 'slot_1', time: '6:00 م - 8:30 م', status: 'available' },
-            slot_2: { id: 'slot_2', time: '9:00 م - 11:30 م', status: 'available' }
+            slot_1: { id: 'slot_1', time: '6:00 م - 8:30 م', startTime: '18:00', endTime: '20:30', status: 'available' },
+            slot_2: { id: 'slot_2', time: '9:00 م - 11:30 م', startTime: '21:00', endTime: '23:30', status: 'available' }
           };
         }
       });
@@ -446,7 +698,9 @@
     }
 
     function renderUI() {
+      weekDays = getUpcomingWeek();
       renderUserHeader();
+      renderAdminButton();
       renderDaysTabs();
       renderSlotsGrid();
       lucide.createIcons();
@@ -459,12 +713,12 @@
           <div class="flex items-center gap-1.5">
             <button onclick="openMyBookingsModal()" class="text-xs font-bold px-3 py-2 rounded-xl bg-slate-900 border border-amber-500/40 text-amber-300 hover:bg-amber-500/10 transition-all flex items-center gap-1.5">
               <i data-lucide="calendar" class="w-3.5 h-3.5"></i>
-              <span>مواعيدي</span>
+              <span>${currentLang === 'ar' ? 'مواعيدي' : 'My Bookings'}</span>
             </button>
             <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900/80 border border-slate-800 text-xs text-slate-300">
               <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
               <span class="font-bold text-white">${escapeHtml(currentUser.username)}</span>
-              <button onclick="logoutUser()" title="تسجيل خروج" class="text-slate-400 hover:text-rose-400 mr-1.5">
+              <button onclick="logoutUser()" title="${currentLang === 'ar' ? 'تسجيل خروج' : 'Logout'}" class="text-slate-400 hover:text-rose-400 ms-1.5">
                 <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
               </button>
             </div>
@@ -474,7 +728,7 @@
         container.innerHTML = `
           <button onclick="openAuthModal('register')" class="text-xs font-bold px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white transition-all flex items-center gap-1.5 shadow-lg shadow-indigo-600/20">
             <i data-lucide="user-plus" class="w-3.5 h-3.5"></i>
-            <span>تسجيل حساب</span>
+            <span>${currentLang === 'ar' ? 'تسجيل حساب' : 'Sign Up'}</span>
           </button>
         `;
       }
@@ -495,13 +749,13 @@
         let statusBadgeClass = '';
 
         if (total === 0) {
-          statusText = 'لا يوجد معاد';
+          statusText = t('no_slots');
           statusBadgeClass = 'bg-slate-800 text-slate-400 border border-slate-700/40';
         } else if (availableCount === 0) {
-          statusText = 'مكتمل';
+          statusText = t('completed');
           statusBadgeClass = 'bg-rose-500/10 text-rose-400 border border-rose-500/20';
         } else {
-          statusText = `${availableCount} متاح`;
+          statusText = currentLang === 'ar' ? `${availableCount} متاح` : `${availableCount} Open`;
           statusBadgeClass = 'bg-emerald-500/10 text-emerald-300 border border-emerald-500/20';
         }
 
@@ -530,13 +784,13 @@
 
         btn.innerHTML = `
           <div class="h-4 flex items-center justify-center">
-            ${day.isToday ? `<span class="px-2 py-0.5 rounded-full text-[9px] font-black leading-none tracking-tight shadow-sm ${todayPillClass}">اليوم</span>` : ''}
+            ${day.isToday ? `<span class="px-2 py-0.5 rounded-full text-[9px] font-black leading-none tracking-tight shadow-sm ${todayPillClass}">${t('today')}</span>` : ''}
           </div>
           <div class="flex flex-col items-center justify-center my-0.5">
             <span class="text-xs font-bold leading-tight">${day.dayName}</span>
             <span class="text-[11px] text-slate-400 font-mono leading-tight">${day.dateStr}</span>
           </div>
-          <span class="text-[9px] px-1.5 py-0.5 rounded-md font-bold leading-tight ${statusBadgeClass}">${statusText}</span>
+          <span class="text-[9px] px-1.5 py-0.5 rounded-md font-bold leading-tight whitespace-nowrap ${statusBadgeClass}">${statusText}</span>
         `;
         container.appendChild(btn);
       });
@@ -544,10 +798,13 @@
 
     function renderSlotsGrid() {
       const activeDay = weekDays[activeDayIndex];
-      document.getElementById('currentDayTitle').innerHTML = `مواعيد ${activeDay.dayName} <span class="text-sm font-mono text-slate-400 font-normal">(${activeDay.dateStr})</span>`;
+      document.getElementById('currentDayTitle').innerHTML = `${t('day_slots_title')} ${activeDay.dayName} <span class="text-sm font-mono text-slate-400 font-normal">(${activeDay.dateStr})</span>`;
 
       const daySlotsObj = appData.slots[activeDay.key] || {};
       const slotsArray = Object.values(daySlotsObj);
+      
+      slotsArray.sort((a, b) => getSlotSortValue(a) - getSlotSortValue(b));
+
       const grid = document.getElementById('slotsGrid');
       const emptyState = document.getElementById('emptyState');
       const summaryBadge = document.getElementById('daySummaryBadge');
@@ -558,7 +815,7 @@
         grid.classList.add('hidden');
         emptyState.classList.remove('hidden');
         summaryBadge.className = 'text-xs px-3 py-1 rounded-full font-bold bg-slate-800 text-slate-400 border border-slate-700';
-        summaryBadge.textContent = 'لا توجد مواعيد';
+        summaryBadge.textContent = t('no_slots');
         return;
       }
 
@@ -568,16 +825,17 @@
       const availCount = slotsArray.filter(s => s.status === 'available').length;
       if (availCount > 0) {
         summaryBadge.className = 'text-xs px-3 py-1 rounded-full font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20';
-        summaryBadge.textContent = `${availCount} مواعيد متاحة`;
+        summaryBadge.textContent = `${availCount} ${t('avail_count_str')}`;
       } else {
         summaryBadge.className = 'text-xs px-3 py-1 rounded-full font-bold bg-rose-500/10 text-rose-400 border border-rose-500/20';
-        summaryBadge.textContent = 'جميع المواعيد محجوزة';
+        summaryBadge.textContent = t('all_booked');
       }
 
       slotsArray.forEach(slot => {
         const isMyBooking = currentUser && slot.bookedBy === currentUser.username;
         const isBooked = slot.status === 'booked';
         const card = document.createElement('div');
+        const formattedDisplayTime = formatTimeForDisplay(slot.time);
 
         if (isMyBooking) {
           card.className = "rounded-3xl p-5 border border-amber-500/30 bg-gradient-to-br from-amber-950/35 via-slate-900 to-amber-950/20 shadow-xl transition-all relative overflow-hidden";
@@ -585,26 +843,26 @@
             <div class="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-amber-400 to-yellow-500"></div>
             <div class="flex items-center justify-between gap-2 mb-3">
               <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl text-xs font-bold bg-amber-500/15 text-amber-300 border border-amber-500/30">
-                <span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-ping mr-1"></span>
-                حجزك أنت
+                <span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-ping me-1"></span>
+                ${t('my_booking_badge')}
               </span>
               <span class="text-xs font-bold font-mono text-slate-300 flex items-center gap-1">
                 <i data-lucide="clock" class="w-3.5 h-3.5 text-amber-400"></i>
-                ${escapeHtml(slot.time)}
+                ${escapeHtml(formattedDisplayTime)}
               </span>
             </div>
 
             <div class="mb-4">
               <h4 class="text-base font-black text-amber-200 flex items-center gap-1.5">
                 <i data-lucide="calendar-check" class="w-4 h-4 text-amber-400"></i>
-                معادك محجوز بنجاح
+                ${t('my_booking_title')}
               </h4>
-              ${slot.topic ? `<p class="text-xs text-slate-300 mt-2 bg-slate-950/60 p-2.5 rounded-xl border border-slate-800/80">ملاحظتك: "${escapeHtml(slot.topic)}"</p>` : ''}
+              ${slot.topic ? `<p class="text-xs text-slate-300 mt-2 bg-slate-950/60 p-2.5 rounded-xl border border-slate-800/80">"${escapeHtml(slot.topic)}"</p>` : ''}
             </div>
 
             <button onclick="promptCancelMySlot('${activeDay.key}', '${slot.id}')" class="w-full py-2.5 rounded-xl bg-amber-500/15 hover:bg-amber-400 hover:text-slate-950 text-amber-300 border border-amber-500/40 text-xs font-bold transition-all flex items-center justify-center gap-1.5">
               <i data-lucide="x-circle" class="w-4 h-4"></i>
-              <span>إلغاء حجزي</span>
+              <span>${t('cancel_my_booking')}</span>
             </button>
           `;
         } else if (isBooked) {
@@ -613,16 +871,22 @@
           let adminExtra = '';
           if (isAdmin) {
             adminExtra = `
-              <div class="mt-3 p-2.5 rounded-xl bg-slate-950/90 border border-rose-500/40 text-xs space-y-1">
+              <div class="mt-3 p-2.5 rounded-xl bg-slate-950/90 border border-rose-500/40 text-xs space-y-1.5">
                 <div class="font-bold text-rose-300 flex items-center gap-1">
                   <i data-lucide="shield-alert" class="w-3.5 h-3.5"></i>
-                  بيانات الأدمن:
+                  ${t('admin_data_badge')}
                 </div>
-                <div class="text-slate-300">الحاجز: <span class="text-white font-bold">${escapeHtml(slot.bookedBy || 'بدون اسم')}</span></div>
-                ${slot.topic ? `<div class="text-slate-300">التوبيك: <span class="text-slate-200">"${escapeHtml(slot.topic)}"</span></div>` : ''}
-                <button onclick="promptAdminFreeSlot('${activeDay.key}', '${slot.id}')" class="w-full mt-2 py-1.5 rounded-lg bg-rose-500 hover:bg-rose-600 text-white font-bold text-xs transition-all">
-                  إلغاء وتفريغ المعاد
-                </button>
+                <div class="text-slate-300">${t('booker_name_str')}: <span class="text-white font-bold">${escapeHtml(slot.bookedBy || 'Unknown')}</span></div>
+                
+                <div class="grid grid-cols-1 gap-1.5 pt-1">
+                  <button onclick="addToGoogleCalendar('${activeDay.key}', '${escapeHtml(slot.bookedBy || '')}', '${escapeHtml(slot.topic || '')}', '${escapeHtml(slot.time)}')" class="py-2 px-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition-all flex items-center justify-center gap-1.5 shadow-md shadow-emerald-600/20">
+                    <i data-lucide="calendar-plus" class="w-3.5 h-3.5 text-emerald-200"></i>
+                    <span>${t('add_to_calendar_btn')}</span>
+                  </button>
+                  <button onclick="promptAdminFreeSlot('${activeDay.key}', '${slot.id}')" class="py-1.5 px-2 rounded-lg bg-rose-500/20 hover:bg-rose-500 text-rose-300 hover:text-white border border-rose-500/30 font-bold text-[11px] transition-all">
+                    ${t('admin_free_btn')}
+                  </button>
+                </div>
               </div>
             `;
           }
@@ -631,25 +895,25 @@
             <div class="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-rose-500 to-red-600"></div>
             <div class="flex items-center justify-between gap-2 mb-3">
               <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl text-xs font-bold bg-rose-500/15 text-rose-300 border border-rose-500/30">
-                <span class="w-1.5 h-1.5 rounded-full bg-rose-400 mr-1"></span>
-                محجوز
+                <span class="w-1.5 h-1.5 rounded-full bg-rose-400 me-1"></span>
+                ${t('booked_badge')}
               </span>
               <span class="text-xs font-bold font-mono text-slate-400 flex items-center gap-1">
                 <i data-lucide="clock" class="w-3.5 h-3.5 text-rose-400"></i>
-                ${escapeHtml(slot.time)}
+                ${escapeHtml(formattedDisplayTime)}
               </span>
             </div>
 
             <div class="mb-4">
               <h4 class="text-base font-black text-slate-300 flex items-center gap-1.5">
                 <i data-lucide="lock" class="w-4 h-4 text-rose-400"></i>
-                المعاد ده محجوز بالفعل
+                ${t('booked_title')}
               </h4>
             </div>
 
             <button disabled class="w-full py-2.5 rounded-xl bg-slate-900/90 text-slate-500 border border-slate-800 text-xs font-bold cursor-not-allowed flex items-center justify-center gap-1.5">
               <i data-lucide="slash" class="w-3.5 h-3.5"></i>
-              <span>المعاد مقفول خلاص</span>
+              <span>${t('booked_locked_btn')}</span>
             </button>
 
             ${adminExtra}
@@ -660,7 +924,7 @@
           let adminDelete = '';
           if (isAdmin) {
             adminDelete = `
-              <button onclick="promptAdminDeleteSlot('${activeDay.key}', '${slot.id}')" title="مسح الميعاد" class="text-slate-500 hover:text-rose-400 p-1 rounded-lg">
+              <button onclick="promptAdminDeleteSlot('${activeDay.key}', '${slot.id}')" title="Delete" class="text-slate-500 hover:text-rose-400 p-1 rounded-lg">
                 <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
               </button>
             `;
@@ -670,31 +934,55 @@
             <div class="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-emerald-400 to-teal-400"></div>
             <div class="flex items-center justify-between gap-2 mb-3">
               <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl text-xs font-bold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
-                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 mr-1"></span>
-                فاضي
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 me-1"></span>
+                ${t('available_badge')}
               </span>
               <div class="flex items-center gap-1">
                 <span class="text-xs font-bold font-mono text-slate-300 flex items-center gap-1">
                   <i data-lucide="clock" class="w-3.5 h-3.5 text-emerald-400"></i>
-                  ${escapeHtml(slot.time)}
+                  ${escapeHtml(formattedDisplayTime)}
                 </span>
                 ${adminDelete}
               </div>
             </div>
 
             <div class="mb-4">
-              <h4 class="text-base font-black text-white">معاد متاح</h4>
+              <h4 class="text-base font-black text-white">${t('available_title')}</h4>
             </div>
 
-            <button onclick="handleBookingClick('${activeDay.key}', '${slot.id}', '${escapeHtml(slot.time)}')" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:opacity-95 text-slate-950 font-black text-xs transition-all shadow-md shadow-emerald-500/20 flex items-center justify-center gap-1.5">
+            <button onclick="handleBookingClick('${activeDay.key}', '${slot.id}', '${escapeHtml(formattedDisplayTime)}')" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:opacity-95 text-slate-950 font-black text-xs transition-all shadow-md shadow-emerald-500/20 flex items-center justify-center gap-1.5">
               <i data-lucide="calendar-plus" class="w-4 h-4 stroke-[2.5]"></i>
-              <span>احجز المعاد ده معايا</span>
+              <span>${t('book_with_me')}</span>
             </button>
           `;
         }
 
         grid.appendChild(card);
       });
+    }
+
+    // -------------------------------------------------------------
+    // Google Calendar Direct Link (All Day Event Format - Fixes 1970 Error)
+    // -------------------------------------------------------------
+    function addToGoogleCalendar(dayKey, bookerName, topic, timeLabel) {
+      const [y, m, d] = dayKey.split('-').map(Number);
+      
+      const startDate = new Date(y, m - 1, d);
+      const endDate = new Date(y, m - 1, d + 1);
+
+      const pad = (n) => String(n).padStart(2, '0');
+      const startStr = `${startDate.getFullYear()}${pad(startDate.getMonth() + 1)}${pad(startDate.getDate())}`;
+      const endStr = `${endDate.getFullYear()}${pad(endDate.getMonth() + 1)}${pad(endDate.getDate())}`;
+
+      const eventTitle = currentLang === 'ar' ? `ميعاد مع ${bookerName}` : `Meetup with ${bookerName}`;
+      const titleParam = encodeURIComponent(eventTitle);
+      
+      const detailsBody = `${currentLang === 'ar' ? 'ميعاد مع:' : 'Appointment with:'} ${bookerName}\n${currentLang === 'ar' ? 'الملاحظات:' : 'Notes:'} ${topic || (currentLang === 'ar' ? 'بدون ملاحظات' : 'No notes')}\n${currentLang === 'ar' ? 'الوقت:' : 'Time:'} ${timeLabel}`;
+      const detailsParam = encodeURIComponent(detailsBody);
+
+      const gcalUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${titleParam}&details=${detailsParam}&dates=${startStr}/${endStr}`;
+      window.open(gcalUrl, '_blank');
+      showToast(currentLang === 'ar' ? 'تم فتح جوجل كالندر بنجاح' : 'Google Calendar opened successfully', 'success');
     }
 
     // -------------------------------------------------------------
@@ -705,11 +993,10 @@
         pendingDayKey = dayKey;
         selectedSlotId = slotId;
         selectedSlotTime = slotTime;
-        showToast('لازم تعمل حساب الأول عشان تقدر تحجز وتلغي بنفسك', 'info');
+        showToast(t('login_to_book_msg'), 'info');
         openAuthModal('register');
         return;
       }
-
       pendingDayKey = dayKey;
       openBookingModal(slotId, slotTime);
     }
@@ -717,7 +1004,7 @@
     function openBookingModal(slotId, slotTime) {
       selectedSlotId = slotId;
       selectedSlotTime = slotTime;
-      document.getElementById('bookingModalTime').textContent = `الوقت: ${slotTime}`;
+      document.getElementById('bookingModalTime').textContent = `${currentLang === 'ar' ? 'الوقت:' : 'Time:'} ${slotTime}`;
       document.getElementById('bookerNameInput').value = currentUser ? currentUser.username : '';
       document.getElementById('bookerTopicInput').value = '';
 
@@ -737,7 +1024,7 @@
       const topic = document.getElementById('bookerTopicInput').value.trim();
 
       if (!currentUser) {
-        showToast('يرجى تسجيل الدخول أولاً', 'error');
+        showToast(currentLang === 'ar' ? 'يرجى تسجيل الدخول أولاً' : 'Please log in first', 'error');
         return;
       }
 
@@ -749,9 +1036,9 @@
         bookedAt: Date.now()
       }).then(() => {
         closeBookingModal();
-        showToast('تم حجز المعاد بنجاح! نتقابل على خير 🎉', 'success');
-      }).catch(err => {
-        showToast('حدث خطأ أثناء الحجز، حاول مجدداً', 'error');
+        showToast(currentLang === 'ar' ? 'تم حجز المعاد بنجاح! نتقابل على خير 🎉' : 'Appointment booked successfully! 🎉', 'success');
+      }).catch(() => {
+        showToast(currentLang === 'ar' ? 'حدث خطأ أثناء الحجز، حاول مجدداً' : 'Booking failed, please retry', 'error');
       });
     }
 
@@ -803,14 +1090,11 @@
         isAdmin = true;
         closeAdminPinModal();
         document.getElementById('adminBanner').classList.remove('hidden');
-        document.getElementById('adminToggleBtn').innerHTML = `
-          <i data-lucide="shield-off" class="w-3.5 h-3.5 text-rose-400"></i>
-          <span>إغلاق الأدمن</span>
-        `;
+        renderAdminButton();
         renderUI();
-        showToast('تم تفعيل وضع الأدمن بنجاح 🛡️', 'success');
+        showToast(currentLang === 'ar' ? 'تم تفعيل وضع الأدمن بنجاح 🛡️' : 'Admin mode enabled 🛡️', 'success');
       } else {
-        showToast('الرمز السري غير صحيح!', 'error');
+        showToast(currentLang === 'ar' ? 'الرمز السري غير صحيح!' : 'Invalid secret PIN!', 'error');
       }
     }
 
@@ -821,21 +1105,18 @@
     function logoutAdmin() {
       isAdmin = false;
       document.getElementById('adminBanner').classList.add('hidden');
-      document.getElementById('adminToggleBtn').innerHTML = `
-        <i data-lucide="shield" class="w-3.5 h-3.5 text-amber-400"></i>
-        <span>دخول الأدمن</span>
-      `;
+      renderAdminButton();
       renderUI();
-      showToast('تم الخروج من وضع الأدمن', 'info');
+      showToast(currentLang === 'ar' ? 'تم الخروج من وضع الأدمن' : 'Logged out of admin mode', 'info');
     }
 
     // -------------------------------------------------------------
-    // Slot Actions
+    // Slot Management Actions
     // -------------------------------------------------------------
     function promptCancelMySlot(dayKey, slotId) {
       openConfirmModal(
-        'إلغاء حجز المعاد',
-        'هل أنت متأكد من رغبتك في إلغاء حجز هذا المعاد؟ سيصبح متاحاً لأي شخص آخر فوراً.',
+        currentLang === 'ar' ? 'إلغاء حجز المعاد' : 'Cancel Booking',
+        currentLang === 'ar' ? 'هل أنت متأكد من رغبتك في إلغاء حجز هذا المعاد؟ سيصبح متاحاً للآخرين فوراً.' : 'Are you sure you want to cancel this booking? It will become open for others.',
         () => {
           db.ref(`slots/${dayKey}/${slotId}`).update({
             status: 'available',
@@ -843,7 +1124,7 @@
             topic: null,
             bookedAt: null
           }).then(() => {
-            showToast('تم إلغاء حجز المعاد وأصبح متاحاً للآخرين', 'success');
+            showToast(currentLang === 'ar' ? 'تم إلغاء حجز المعاد وأصبح متاحاً' : 'Booking cancelled successfully', 'success');
           });
         }
       );
@@ -851,8 +1132,8 @@
 
     function promptAdminFreeSlot(dayKey, slotId) {
       openConfirmModal(
-        'تفريغ المعاد (أدمن)',
-        'هل تريد إلغاء حجز هذا الشخص وتفريغ المعاد ليصبح متاحاً للجميع؟',
+        currentLang === 'ar' ? 'تفريغ المعاد (أدمن)' : 'Free Up Slot (Admin)',
+        currentLang === 'ar' ? 'هل تريد إلغاء حجز هذا الشخص وتفريغ المعاد ليصبح متاحاً للجميع؟' : 'Release this slot back to open status for all users?',
         () => {
           db.ref(`slots/${dayKey}/${slotId}`).update({
             status: 'available',
@@ -860,7 +1141,7 @@
             topic: null,
             bookedAt: null
           }).then(() => {
-            showToast('تم تفريغ المعاد بنجاح', 'success');
+            showToast(currentLang === 'ar' ? 'تم تفريغ المعاد بنجاح' : 'Slot released', 'success');
           });
         }
       );
@@ -868,11 +1149,11 @@
 
     function promptAdminDeleteSlot(dayKey, slotId) {
       openConfirmModal(
-        'حذف الميعاد نهائياً',
-        'هل أنت متأكد من مسح هذا الوقت تماماً من جدول اليوم؟',
+        currentLang === 'ar' ? 'حذف الميعاد نهائياً' : 'Delete Slot Permanently',
+        currentLang === 'ar' ? 'هل أنت متأكد من مسح هذا الوقت تماماً من جدول اليوم؟' : 'Delete this time slot completely from today?',
         () => {
           db.ref(`slots/${dayKey}/${slotId}`).remove().then(() => {
-            showToast('تم حذف الميعاد من الجدول', 'success');
+            showToast(currentLang === 'ar' ? 'تم حذف الميعاد من الجدول' : 'Slot removed from schedule', 'success');
           });
         }
       );
@@ -905,16 +1186,16 @@
       if (mode === 'login') {
         tabLogin.className = 'flex-1 py-1.5 text-xs font-bold rounded-lg bg-indigo-600 text-white transition-all';
         tabReg.className = 'flex-1 py-1.5 text-xs font-bold rounded-lg text-slate-400 hover:text-white transition-all';
-        title.textContent = 'تسجيل الدخول';
-        sub.textContent = 'أهلاً بعودتك! ادخل اسمك وباسوردك';
-        submit.textContent = 'تسجيل الدخول ومتابعة الحجز';
+        title.textContent = currentLang === 'ar' ? 'تسجيل الدخول' : 'Sign In';
+        sub.textContent = currentLang === 'ar' ? 'أهلاً بعودتك! ادخل اسمك وباسوردك' : 'Welcome back! Enter your username and password';
+        submit.textContent = currentLang === 'ar' ? 'تسجيل الدخول ومتابعة الحجز' : 'Sign In & Continue';
         icon.setAttribute('data-lucide', 'user-check');
       } else {
         tabReg.className = 'flex-1 py-1.5 text-xs font-bold rounded-lg bg-indigo-600 text-white transition-all';
         tabLogin.className = 'flex-1 py-1.5 text-xs font-bold rounded-lg text-slate-400 hover:text-white transition-all';
-        title.textContent = 'إنشاء حساب جديد';
-        sub.textContent = 'سجل حسابك في ثواني عشان تحجز وتتحكم في مواعيدك';
-        submit.textContent = 'إنشاء الحساب ومتابعة الحجز';
+        title.textContent = currentLang === 'ar' ? 'إنشاء حساب جديد' : 'Create an Account';
+        sub.textContent = currentLang === 'ar' ? 'سجل حسابك في ثواني عشان تحجز وتتحكم في مواعيدك' : 'Sign up in seconds to book and manage appointments';
+        submit.textContent = currentLang === 'ar' ? 'إنشاء الحساب ومتابعة الحجز' : 'Sign Up & Continue';
         icon.setAttribute('data-lucide', 'user-plus');
       }
       lucide.createIcons();
@@ -925,14 +1206,14 @@
       const p = document.getElementById('authPasswordInput').value.trim();
 
       if (!u || !p) {
-        showToast('يرجى كتابة اسم المستخدم وكلمة المرور', 'error');
+        showToast(currentLang === 'ar' ? 'يرجى كتابة اسم المستخدم وكلمة المرور' : 'Please fill both username and password', 'error');
         return;
       }
 
       if (authMode === 'register') {
         db.ref(`users/${u}`).once('value').then(snap => {
           if (snap.exists()) {
-            showToast('اسم المستخدم ده محجوز، جرب اسم تاني أو سجل دخول', 'error');
+            showToast(currentLang === 'ar' ? 'اسم المستخدم ده محجوز، جرب اسم تاني' : 'Username taken, choose another', 'error');
           } else {
             db.ref(`users/${u}`).set({
               password: p,
@@ -942,7 +1223,7 @@
               localStorage.setItem('schedule_current_user', JSON.stringify(currentUser));
               closeAuthModal();
               renderUI();
-              showToast(`أهلاً بيك يا ${u}! تم إنشاء حسابك`, 'success');
+              showToast(currentLang === 'ar' ? `أهلاً بيك يا ${u}! تم إنشاء حسابك` : `Welcome ${u}! Account created`, 'success');
 
               if (selectedSlotId && selectedSlotTime) {
                 setTimeout(() => {
@@ -959,7 +1240,7 @@
             localStorage.setItem('schedule_current_user', JSON.stringify(currentUser));
             closeAuthModal();
             renderUI();
-            showToast(`تم تسجيل الدخول بنجاح! مرحباً ${u}`, 'success');
+            showToast(currentLang === 'ar' ? `تم تسجيل الدخول بنجاح! مرحباً ${u}` : `Logged in successfully! Welcome ${u}`, 'success');
 
             if (selectedSlotId && selectedSlotTime) {
               setTimeout(() => {
@@ -967,7 +1248,7 @@
               }, 300);
             }
           } else {
-            showToast('اسم المستخدم أو كلمة المرور غير صحيحة', 'error');
+            showToast(currentLang === 'ar' ? 'اسم المستخدم أو كلمة المرور غير صحيحة' : 'Invalid username or password', 'error');
           }
         });
       }
@@ -977,7 +1258,7 @@
       currentUser = null;
       localStorage.removeItem('schedule_current_user');
       renderUI();
-      showToast('تم تسجيل الخروج', 'info');
+      showToast(currentLang === 'ar' ? 'تم تسجيل الخروج' : 'Logged out', 'info');
     }
 
     // -------------------------------------------------------------
@@ -999,11 +1280,11 @@
             item.className = 'p-3 rounded-2xl bg-slate-950 border border-slate-800 flex items-center justify-between gap-3';
             item.innerHTML = `
               <div>
-                <div class="text-xs font-bold text-white">${dayKey} - ${escapeHtml(s.time)}</div>
-                ${s.topic ? `<div class="text-[11px] text-slate-400">ملاحظة: ${escapeHtml(s.topic)}</div>` : ''}
+                <div class="text-xs font-bold text-white">${dayKey} - ${escapeHtml(formatTimeForDisplay(s.time))}</div>
+                ${s.topic ? `<div class="text-[11px] text-slate-400">${escapeHtml(s.topic)}</div>` : ''}
               </div>
               <button onclick="promptCancelMySlot('${dayKey}', '${slotId}')" class="px-3 py-1.5 rounded-xl bg-amber-500/10 text-amber-300 border border-amber-500/30 text-xs font-bold hover:bg-amber-400 hover:text-slate-950 transition-all">
-                إلغاء
+                ${t('cancel')}
               </button>
             `;
             list.appendChild(item);
@@ -1015,7 +1296,7 @@
         list.innerHTML = `
           <div class="text-center py-8 text-slate-400 text-xs">
             <i data-lucide="calendar-off" class="w-8 h-8 mx-auto mb-2 opacity-50"></i>
-            معندكش أي مواعيد محجوزة حالياً.
+            ${currentLang === 'ar' ? 'معندكش أي مواعيد محجوزة حالياً.' : 'No scheduled appointments.'}
           </div>
         `;
       }
@@ -1029,12 +1310,43 @@
     }
 
     // -------------------------------------------------------------
-    // Admin: Slots & Users
+    // Admin: Slot Input Mode & Save
     // -------------------------------------------------------------
+    function switchSlotInputMode(mode) {
+      slotInputMode = mode;
+      const btnPicker = document.getElementById('slotModePickerBtn');
+      const btnManual = document.getElementById('slotModeManualBtn');
+      const secPicker = document.getElementById('slotPickerSection');
+      const secManual = document.getElementById('slotManualSection');
+
+      if (mode === 'picker') {
+        btnPicker.className = 'flex-1 py-1.5 rounded-lg bg-amber-500 text-slate-950 transition-all font-black';
+        btnManual.className = 'flex-1 py-1.5 rounded-lg text-slate-400 hover:text-white transition-all';
+        secPicker.classList.remove('hidden');
+        secManual.classList.add('hidden');
+      } else {
+        btnManual.className = 'flex-1 py-1.5 rounded-lg bg-amber-500 text-slate-950 transition-all font-black';
+        btnPicker.className = 'flex-1 py-1.5 rounded-lg text-slate-400 hover:text-white transition-all';
+        secManual.classList.remove('hidden');
+        secPicker.classList.add('hidden');
+      }
+    }
+
+    function formatTime12h(timeStr) {
+      if (!timeStr) return '';
+      const [h, m] = timeStr.split(':').map(Number);
+      const suffixAr = h >= 12 ? 'م' : 'ص';
+      const suffixEn = h >= 12 ? 'PM' : 'AM';
+      let hour12 = h % 12;
+      if (hour12 === 0) hour12 = 12;
+      const minStr = m === 0 ? '00' : (m < 10 ? '0' + m : m);
+      return currentLang === 'ar' ? `${hour12}:${minStr} ${suffixAr}` : `${hour12}:${minStr} ${suffixEn}`;
+    }
+
     function openAddSlotModal() {
       const activeDay = weekDays[activeDayIndex];
-      document.getElementById('addSlotDayLabel').textContent = `إضافة ليوم: ${activeDay.dayName} (${activeDay.dateStr})`;
-      document.getElementById('newSlotTimeInput').value = '';
+      document.getElementById('addSlotDayLabel').textContent = `${activeDay.dayName} (${activeDay.dateStr})`;
+      switchSlotInputMode('picker');
       document.getElementById('addSlotModal').classList.remove('hidden');
       lucide.createIcons();
     }
@@ -1045,24 +1357,42 @@
 
     function adminSaveNewSlot() {
       const activeDay = weekDays[activeDayIndex];
-      const timeVal = document.getElementById('newSlotTimeInput').value.trim();
+      let displayTime = '';
+      let startTime = '';
+      let endTime = '';
 
-      if (!timeVal) {
-        showToast('يرجى كتابة وقت الميعاد', 'error');
-        return;
+      if (slotInputMode === 'picker') {
+        startTime = document.getElementById('slotPickerStart').value;
+        endTime = document.getElementById('slotPickerEnd').value;
+        if (!startTime || !endTime) {
+          showToast(currentLang === 'ar' ? 'حدد وقت البداية والنهاية' : 'Please choose start and end times', 'error');
+          return;
+        }
+        displayTime = `${startTime} - ${endTime}`;
+      } else {
+        displayTime = document.getElementById('newSlotTimeInput').value.trim();
+        if (!displayTime) {
+          showToast(currentLang === 'ar' ? 'اكتب وقت الميعاد يدوياً' : 'Enter time manually', 'error');
+          return;
+        }
       }
 
       const newKey = 'slot_' + Date.now();
       db.ref(`slots/${activeDay.key}/${newKey}`).set({
         id: newKey,
-        time: timeVal,
+        time: displayTime,
+        startTime: startTime || '',
+        endTime: endTime || '',
         status: 'available'
       }).then(() => {
         closeAddSlotModal();
-        showToast('تمت إضافة الميعاد للجدول بنجاح', 'success');
+        showToast(currentLang === 'ar' ? 'تمت إضافة الميعاد للجدول بنجاح' : 'Slot added successfully', 'success');
       });
     }
 
+    // -------------------------------------------------------------
+    // Admin: Manage Users
+    // -------------------------------------------------------------
     function openManageUsersModal() {
       renderAdminUsersList();
       document.getElementById('adminNewUser').value = '';
@@ -1084,7 +1414,7 @@
       const userKeys = Object.keys(users);
 
       if (userKeys.length === 0) {
-        container.innerHTML = '<div class="text-center py-4 text-xs text-slate-500">لا يوجد حسابات مسجلة حتى الآن</div>';
+        container.innerHTML = `<div class="text-center py-4 text-xs text-slate-500">${currentLang === 'ar' ? 'لا يوجد حسابات مسجلة' : 'No accounts found'}</div>`;
         return;
       }
 
@@ -1095,10 +1425,10 @@
         row.innerHTML = `
           <div>
             <div class="font-bold text-white">${escapeHtml(username)}</div>
-            <div class="text-[11px] text-slate-400 font-mono">باسورد: <span class="text-amber-300 font-bold">${escapeHtml(u.password || '---')}</span></div>
+            <div class="text-[11px] text-slate-400 font-mono">${currentLang === 'ar' ? 'باسورد:' : 'Password:'} <span class="text-amber-300 font-bold">${escapeHtml(u.password || '---')}</span></div>
           </div>
           <button onclick="promptAdminDeleteUser('${escapeHtml(username)}')" class="px-2.5 py-1 rounded-lg bg-rose-500/10 hover:bg-rose-500 hover:text-white text-rose-400 text-[11px] font-bold transition-all">
-            حذف الحساب
+            ${currentLang === 'ar' ? 'حذف' : 'Delete'}
           </button>
         `;
         container.appendChild(row);
@@ -1110,7 +1440,7 @@
       const p = document.getElementById('adminNewPass').value.trim();
 
       if (!u || !p) {
-        showToast('اكتب اسم المستخدم والباسورد', 'error');
+        showToast(currentLang === 'ar' ? 'اكتب اسم المستخدم والباسورد' : 'Fill user & password', 'error');
         return;
       }
 
@@ -1120,17 +1450,17 @@
       }).then(() => {
         document.getElementById('adminNewUser').value = '';
         document.getElementById('adminNewPass').value = '';
-        showToast(`تمت إضافة حساب ${u} بنجاح`, 'success');
+        showToast(currentLang === 'ar' ? `تمت إضافة حساب ${u}` : `Account ${u} created`, 'success');
       });
     }
 
     function promptAdminDeleteUser(username) {
       openConfirmModal(
-        'حذف الحساب',
-        `هل أنت متأكد من حذف حساب "${username}" نهائياً؟`,
+        currentLang === 'ar' ? 'حذف الحساب' : 'Delete Account',
+        currentLang === 'ar' ? `هل أنت متأكد من حذف حساب "${username}" نهائياً؟` : `Are you sure you want to delete "${username}"?`,
         () => {
           db.ref(`users/${username}`).remove().then(() => {
-            showToast(`تم حذف حساب ${username}`, 'info');
+            showToast(currentLang === 'ar' ? `تم حذف حساب ${username}` : `User ${username} deleted`, 'info');
           });
         }
       );
@@ -1172,6 +1502,7 @@
     }
 
     window.addEventListener('DOMContentLoaded', () => {
+      applyLanguageSettings();
       setupFirebaseSync();
     });
   </script>
