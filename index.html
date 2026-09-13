@@ -1,0 +1,1412 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>جدول المواعيد</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Google Fonts: Cairo -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Cairo', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    .slot-card {
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .slot-card:hover {
+      transform: translateY(-2px);
+    }
+    .pulse-subtle {
+      animation: pulseSubtle 2s infinite;
+    }
+    @keyframes pulseSubtle {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.6; }
+    }
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen font-sans antialiased selection:bg-rose-500 selection:text-white flex flex-col justify-between">
+
+  <div>
+    <!-- Top Header -->
+    <header class="border-b border-slate-800/80 bg-slate-900/90 backdrop-blur sticky top-0 z-30">
+      <div class="max-w-5xl mx-auto px-4 sm:px-6 py-3.5 flex items-center justify-between gap-3">
+        
+        <!-- App Title -->
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-rose-500 to-amber-500 flex items-center justify-center shadow-lg shadow-rose-500/20">
+            <i data-lucide="calendar" class="w-5 h-5 text-white"></i>
+          </div>
+          <div>
+            <h1 class="text-lg sm:text-xl font-bold tracking-tight text-white">
+              جدول المواعيد
+            </h1>
+          </div>
+        </div>
+
+        <!-- User & Admin Actions -->
+        <div class="flex items-center gap-2 sm:gap-2.5">
+          <!-- User Profile / Auth Button Container -->
+          <div id="userHeaderArea" class="flex items-center gap-2">
+            <!-- Rendered dynamically by JS -->
+          </div>
+
+          <!-- Admin Button -->
+          <button id="adminToggleBtn" onclick="openAdminAuthModal()" class="flex items-center gap-1.5 px-3 py-1.5 sm:px-3.5 sm:py-2 text-xs sm:text-sm font-semibold rounded-xl border border-slate-700 hover:border-slate-600 bg-slate-800/80 hover:bg-slate-800 text-slate-300 hover:text-white transition shadow-sm">
+            <i data-lucide="lock" class="w-4 h-4 text-amber-400"></i>
+            <span id="adminBtnLabel">دخول الأدمن</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Admin Status Banner (Active only when Admin is logged in) -->
+      <div id="adminBanner" class="hidden bg-amber-500/10 border-t border-b border-amber-500/30 px-4 py-2.5 text-xs sm:text-sm text-amber-300 font-medium">
+        <div class="max-w-5xl mx-auto flex flex-wrap items-center justify-between gap-3">
+          <div class="flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-amber-400 pulse-subtle inline-block"></span>
+            <span>أنت الآن في <strong>وضع صاحب الجدول (الأدمن)</strong>.</span>
+          </div>
+          
+          <div class="flex items-center gap-2 sm:gap-3">
+            <button onclick="openAccountsModal()" class="px-2.5 py-1 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 text-amber-200 font-bold flex items-center gap-1 transition">
+              <i data-lucide="users" class="w-3.5 h-3.5"></i>
+              <span>إدارة الحسابات</span>
+            </button>
+            <button onclick="openAddSlotModal()" class="px-2.5 py-1 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/40 text-emerald-200 font-bold flex items-center gap-1 transition">
+              <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i>
+              <span>إضافة معاد جديد</span>
+            </button>
+            <button onclick="logoutAdmin()" class="text-rose-400 underline hover:text-rose-300 font-bold px-1 transition">
+              خروج
+            </button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-6">
+
+      <!-- Instructions & Legend Card -->
+      <div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-4 sm:p-5 shadow-sm">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h2 class="text-sm sm:text-base font-bold text-slate-200 mb-1">إزاي تحجز معادك؟</h2>
+            <p class="text-xs sm:text-sm text-slate-400">
+              اختار اليوم من الشريط، واضغط على أي مربع <strong class="text-emerald-400">أخضر (متاح)</strong> عشان تحجز المعاد فوراً. المربعات <strong class="text-rose-400">الحمراء (محجوز)</strong> مقفولة وخاصة.
+            </p>
+          </div>
+
+          <div class="flex items-center gap-3 bg-slate-950/80 px-3 py-2 rounded-xl border border-slate-800 self-start sm:self-auto shrink-0">
+            <div class="flex items-center gap-1.5 text-xs text-emerald-400 font-semibold">
+              <span class="w-3 h-3 rounded-full bg-emerald-500/20 border border-emerald-500 flex items-center justify-center">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+              </span>
+              متاح للحجز
+            </div>
+            <div class="w-px h-4 bg-slate-800"></div>
+            <div class="flex items-center gap-1.5 text-xs text-rose-400 font-semibold">
+              <span class="w-3 h-3 rounded-full bg-rose-500/20 border border-rose-500 flex items-center justify-center">
+                <span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
+              </span>
+              محجوز ومقفول
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Days Navigation Slider -->
+      <div class="space-y-2">
+        <div class="flex items-center justify-between px-1">
+          <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider">اختر اليوم:</label>
+          <span id="currentDateDisplay" class="text-xs text-emerald-400 font-medium"></span>
+        </div>
+
+        <!-- Scrollable container with ample padding preventing box clipping/overflow cuts -->
+        <div class="overflow-x-auto no-scrollbar scroll-smooth py-3 px-2 -mx-2">
+          <div id="daysTabsContainer" class="flex gap-2.5 min-w-max items-center">
+            <!-- Populated dynamically -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Slots Content Area -->
+      <div class="space-y-3 pt-1">
+        <div class="flex items-center justify-between">
+          <h3 id="selectedDayTitle" class="text-base sm:text-lg font-bold text-white flex items-center gap-2">
+            <!-- Populated dynamically -->
+          </h3>
+          <span id="slotsCountBadge" class="text-xs px-3 py-1 rounded-full border font-semibold">
+            <!-- Populated dynamically -->
+          </span>
+        </div>
+
+        <!-- Grid of Time Slots -->
+        <div id="slotsGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3.5">
+          <!-- Dynamic Slot Cards -->
+        </div>
+
+        <!-- Empty State -->
+        <div id="emptyState" class="hidden text-center py-12 px-4 border border-dashed border-slate-800 rounded-2xl bg-slate-900/40">
+          <div class="w-12 h-12 rounded-full bg-slate-800 flex items-center justify-center mx-auto text-slate-500 mb-3">
+            <i data-lucide="calendar-x-2" class="w-6 h-6"></i>
+          </div>
+          <h4 class="text-base font-bold text-slate-300">لا يوجد مواعيد متسجلة لليوم ده</h4>
+          <p class="text-xs text-slate-500 mt-1">تقدر تختار يوم تاني من الأيام اللي فوق، أو تفتح لوحة الأدمن وتضيف مواعيد جديدة.</p>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <footer class="py-4"></footer>
+
+  <!-- User Auth Modal (Login / Register) -->
+  <div id="userAuthModal" class="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-sm p-6 shadow-2xl relative animate-in fade-in zoom-in-95 duration-200">
+      <button onclick="closeUserAuthModal()" class="absolute top-4 left-4 text-slate-400 hover:text-white p-1 rounded-full hover:bg-slate-800 transition">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+
+      <div class="text-center mb-5">
+        <div class="w-11 h-11 rounded-2xl bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 flex items-center justify-center mx-auto mb-2.5">
+          <i data-lucide="user-check" class="w-5 h-5"></i>
+        </div>
+        <h3 id="authModalTitle" class="text-lg font-bold text-white">تسجيل الدخول لحسابك</h3>
+        <p id="authModalSubtitle" class="text-xs text-slate-400 mt-1">سجل دخولك عشان تقدر تحجز وتتابع مواعيدك</p>
+      </div>
+
+      <!-- Mode Switcher Tabs -->
+      <div class="flex rounded-xl bg-slate-950 p-1 mb-4 border border-slate-800 text-xs font-semibold">
+        <button type="button" id="tabLoginBtn" onclick="switchAuthMode('login')" class="flex-1 py-1.5 rounded-lg transition bg-slate-800 text-white shadow-sm">
+          تسجيل دخول
+        </button>
+        <button type="button" id="tabRegisterBtn" onclick="switchAuthMode('register')" class="flex-1 py-1.5 rounded-lg transition text-slate-400 hover:text-white">
+          حساب جديد
+        </button>
+      </div>
+
+      <form id="userAuthForm" onsubmit="handleUserAuthSubmit(event)" class="space-y-4">
+        <div>
+          <label for="authUsername" class="block text-xs font-semibold text-slate-300 mb-1">اسم المستخدم / اسمك:</label>
+          <input type="text" id="authUsername" required placeholder="مثال: أحمد عبد الله" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500 transition">
+        </div>
+
+        <div>
+          <label for="authPassword" class="block text-xs font-semibold text-slate-300 mb-1">كلمة المرور (الباسورد):</label>
+          <input type="password" id="authPassword" required placeholder="••••••••" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500 transition">
+        </div>
+
+        <p id="authErrorMsg" class="text-xs text-rose-400 hidden text-center"></p>
+
+        <button type="submit" id="authSubmitBtn" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 px-4 rounded-xl text-sm transition shadow-lg shadow-emerald-600/25 flex items-center justify-center gap-2">
+          <i data-lucide="log-in" class="w-4 h-4"></i>
+          <span id="authSubmitLabel">تسجيل الدخول</span>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- User My Bookings Modal -->
+  <div id="myBookingsModal" class="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-md p-6 shadow-2xl relative animate-in fade-in zoom-in-95 duration-200">
+      <button onclick="closeMyBookingsModal()" class="absolute top-4 left-4 text-slate-400 hover:text-white p-1 rounded-full hover:bg-slate-800 transition">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+
+      <div class="flex items-center gap-3 mb-4">
+        <div class="w-10 h-10 rounded-2xl bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 flex items-center justify-center">
+          <i data-lucide="calendar-check" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <h3 class="text-base sm:text-lg font-bold text-white">مواعيدي المحجوزة</h3>
+          <p id="myBookingsUserLabel" class="text-xs text-slate-400"></p>
+        </div>
+      </div>
+
+      <div id="myBookingsList" class="space-y-2.5 max-h-72 overflow-y-auto pr-1">
+        <!-- Rendered dynamically -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Booking Modal -->
+  <div id="bookModal" class="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-md p-6 shadow-2xl relative animate-in fade-in zoom-in-95 duration-200">
+      <button onclick="closeBookModal()" class="absolute top-4 left-4 text-slate-400 hover:text-white p-1 rounded-full hover:bg-slate-800 transition">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+
+      <div class="flex items-center gap-3 mb-4">
+        <div class="w-10 h-10 rounded-2xl bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 flex items-center justify-center">
+          <i data-lucide="calendar-check" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <h3 class="text-lg font-bold text-white">تأكيد حجز المعاد</h3>
+          <p id="modalSlotTime" class="text-xs text-slate-400"></p>
+        </div>
+      </div>
+
+      <form id="bookingForm" onsubmit="handleBookingSubmit(event)" class="space-y-4">
+        <input type="hidden" id="bookingSlotId">
+
+        <div>
+          <label for="bookerName" class="block text-xs font-semibold text-slate-300 mb-1.5">اسمك: <span class="text-rose-400">*</span></label>
+          <input type="text" id="bookerName" required class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500 transition">
+        </div>
+
+        <div>
+          <label for="bookerNote" class="block text-xs font-semibold text-slate-300 mb-1.5">موضوع القعدة / ملاحظة (اختياري)</label>
+          <textarea id="bookerNote" rows="2" placeholder="اكتب لو في موضوع حابب نتكلم فيه.." class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500 transition resize-none"></textarea>
+        </div>
+
+        <div class="bg-slate-950/80 border border-slate-800 rounded-xl p-3 text-xs text-slate-400 flex items-start gap-2">
+          <i data-lucide="shield-check" class="w-4 h-4 text-emerald-400 shrink-0 mt-0.5"></i>
+          <span>حجزك خاص تماماً، ومحدش هيعرف مين اللي حاجز أو موضوع الحجز غير صاحب الجدول فقط.</span>
+        </div>
+
+        <div class="flex items-center gap-3 pt-2">
+          <button type="submit" class="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 px-4 rounded-xl text-sm transition shadow-lg shadow-emerald-600/25 flex items-center justify-center gap-2">
+            <i data-lucide="check" class="w-4 h-4"></i>
+            تأكيد الحجز فوراً
+          </button>
+          <button type="button" onclick="closeBookModal()" class="px-4 py-2.5 rounded-xl border border-slate-700 text-sm font-semibold text-slate-300 hover:bg-slate-800 transition">
+            إلغاء
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Admin Auth Modal (PIN: 3276 strictly) -->
+  <div id="adminAuthModal" class="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-sm p-6 shadow-2xl relative animate-in fade-in zoom-in-95 duration-200">
+      <button onclick="closeAdminAuthModal()" class="absolute top-4 left-4 text-slate-400 hover:text-white p-1 rounded-full hover:bg-slate-800 transition">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+
+      <div class="text-center mb-5">
+        <div class="w-12 h-12 rounded-2xl bg-amber-500/20 border border-amber-500/30 text-amber-400 flex items-center justify-center mx-auto mb-3">
+          <i data-lucide="shield-check" class="w-6 h-6"></i>
+        </div>
+        <h3 class="text-lg font-bold text-white">منطقة الأدمن (صاحب الجدول)</h3>
+        <p class="text-xs text-slate-400 mt-1">أدخل الرقم السري للتحكم الكامل في المواعيد والحسابات</p>
+      </div>
+
+      <form id="adminAuthForm" onsubmit="handleAdminAuth(event)" class="space-y-4">
+        <div>
+          <label for="adminPin" class="block text-xs font-semibold text-slate-300 mb-1.5 text-center">الرقم السري</label>
+          <input type="password" id="adminPin" required placeholder="••••" maxlength="10" class="w-full text-center text-xl tracking-widest bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-white placeholder-slate-600 focus:outline-none focus:border-amber-500 transition">
+          <p id="pinErrorMsg" class="text-xs text-rose-400 mt-1.5 text-center hidden">الرقم السري غير صحيح! جرب تاني.</p>
+        </div>
+
+        <button type="submit" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-2.5 px-4 rounded-xl text-sm transition shadow-lg shadow-amber-500/20 flex items-center justify-center gap-2">
+          <i data-lucide="key" class="w-4 h-4"></i>
+          دخول لوحة التحكم
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Admin Accounts Management Modal -->
+  <div id="accountsModal" class="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-2xl p-6 shadow-2xl relative animate-in fade-in zoom-in-95 duration-200">
+      <button onclick="closeAccountsModal()" class="absolute top-4 left-4 text-slate-400 hover:text-white p-1 rounded-full hover:bg-slate-800 transition">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+
+      <div class="flex items-center justify-between mb-5">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-2xl bg-amber-500/20 border border-amber-500/30 text-amber-400 flex items-center justify-center">
+            <i data-lucide="users" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h3 class="text-lg font-bold text-white">إدارة الحسابات المسجلة</h3>
+            <p class="text-xs text-slate-400">عرض كافة المستخدمين، الباسوردات، وحجوزاتهم، وإمكانية إضافة أو حذف أي حساب</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Add New Account Form (Admin direct) -->
+      <form id="adminCreateAccountForm" onsubmit="handleAdminCreateAccount(event)" class="bg-slate-950 p-4 rounded-2xl border border-slate-800 mb-5 space-y-3">
+        <h4 class="text-xs font-bold text-amber-400 flex items-center gap-1.5">
+          <i data-lucide="user-plus" class="w-4 h-4"></i>
+          إضافة حساب جديد مباشرةً:
+        </h4>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+          <input type="text" id="newAdminUsername" required placeholder="اسم المستخدم" class="bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-500">
+          <input type="text" id="newAdminPassword" required placeholder="كلمة المرور" class="bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-500">
+          <button type="submit" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-2 px-3 rounded-xl text-xs transition flex items-center justify-center gap-1.5 shadow-sm">
+            <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+            حفظ الحساب
+          </button>
+        </div>
+      </form>
+
+      <!-- Accounts Table List -->
+      <div class="overflow-x-auto max-h-72 border border-slate-800 rounded-2xl">
+        <table class="w-full text-right text-xs">
+          <thead class="bg-slate-950/80 text-slate-400 border-b border-slate-800">
+            <tr>
+              <th class="p-3">اسم المستخدم</th>
+              <th class="p-3">كلمة المرور</th>
+              <th class="p-3 text-center">المواعيد المحجوزة</th>
+              <th class="p-3 text-left">إجراءات</th>
+            </tr>
+          </thead>
+          <tbody id="accountsTableBody" class="divide-y divide-slate-800/60 text-slate-200">
+            <!-- Populated dynamically -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Slot Modal (Admin only) -->
+  <div id="addSlotModal" class="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-md p-6 shadow-2xl relative animate-in fade-in zoom-in-95 duration-200">
+      <button onclick="closeAddSlotModal()" class="absolute top-4 left-4 text-slate-400 hover:text-white p-1 rounded-full hover:bg-slate-800 transition">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+
+      <div class="flex items-center gap-3 mb-4">
+        <div class="w-10 h-10 rounded-2xl bg-amber-500/20 border border-amber-500/30 text-amber-400 flex items-center justify-center">
+          <i data-lucide="plus-circle" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <h3 class="text-lg font-bold text-white">إضافة معاد جديد</h3>
+          <p class="text-xs text-slate-400">حدد وقت فاضي جديد ليوم معين</p>
+        </div>
+      </div>
+
+      <form id="addSlotForm" onsubmit="handleAddSlotSubmit(event)" class="space-y-4">
+        <div>
+          <label for="newSlotDay" class="block text-xs font-semibold text-slate-300 mb-1.5">اليوم:</label>
+          <select id="newSlotDay" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-amber-500">
+            <!-- Populated dynamically -->
+          </select>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label for="startTime" class="block text-xs font-semibold text-slate-300 mb-1.5">من الساعة:</label>
+            <input type="text" id="startTime" required placeholder="مثال: 7:00 م" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amber-500">
+          </div>
+          <div>
+            <label for="endTime" class="block text-xs font-semibold text-slate-300 mb-1.5">إلى الساعة:</label>
+            <input type="text" id="endTime" required placeholder="مثال: 9:00 م" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amber-500">
+          </div>
+        </div>
+
+        <div class="flex items-center gap-3 pt-2">
+          <button type="submit" class="flex-1 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-2.5 px-4 rounded-xl text-sm transition shadow-lg shadow-amber-500/20">
+            حفظ وإتاحة المعاد
+          </button>
+          <button type="button" onclick="closeAddSlotModal()" class="px-4 py-2.5 rounded-xl border border-slate-700 text-sm font-semibold text-slate-300 hover:bg-slate-800 transition">
+            إلغاء
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toastContainer" class="fixed bottom-5 left-5 right-5 sm:right-auto sm:w-96 z-50 pointer-events-none flex flex-col gap-2"></div>
+
+  <script>
+    // Storage Keys
+    const STORAGE_KEY_SLOTS = 'friends_schedule_slots_v6';
+    const STORAGE_KEY_USERS = 'friends_schedule_users_v6';
+    const STORAGE_KEY_AUTH = 'friends_schedule_current_user_v6';
+    const STORAGE_KEY_ADMIN = 'friends_schedule_admin_v6';
+
+    // Strict Admin PIN
+    const ADMIN_PIN = '3276';
+
+    // Standard Days Map
+    const DAY_INDEX_MAP = {
+      0: { id: 'sun', name: 'الأحد' },
+      1: { id: 'mon', name: 'الإثنين' },
+      2: { id: 'tue', name: 'الثلاثاء' },
+      3: { id: 'wed', name: 'الأربعاء' },
+      4: { id: 'thu', name: 'الخميس' },
+      5: { id: 'fri', name: 'الجمعة' },
+      6: { id: 'sat', name: 'السبت' }
+    };
+
+    const ARABIC_MONTHS = [
+      'يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو',
+      'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'
+    ];
+
+    // Seed Demo Users
+    const INITIAL_USERS = [
+      { id: 'u_1', username: 'أحمد شريف', password: '123' },
+      { id: 'u_2', username: 'عمر وإبراهيم', password: '123' },
+      { id: 'u_3', username: 'كريم ممدوح', password: '123' },
+      { id: 'u_4', username: 'محمد سامي', password: '123' }
+    ];
+
+    // Seed Initial Slots
+    const INITIAL_SLOTS = [
+      { id: '1', dayId: 'sat', time: '5:00 م - 7:00 م', isBooked: false, bookedBy: '', bookedUserId: '', note: '', bookedAt: null },
+      { id: '2', dayId: 'sat', time: '7:30 م - 9:30 م', isBooked: true, bookedBy: 'أحمد شريف', bookedUserId: 'u_1', note: 'قعدة قهوة ودردشة', bookedAt: '2026-09-12T18:30:00Z' },
+      { id: '3', dayId: 'sat', time: '10:00 م - 12:00 ص', isBooked: false, bookedBy: '', bookedUserId: '', note: '', bookedAt: null },
+      
+      { id: '4', dayId: 'sun', time: '6:00 م - 8:00 م', isBooked: true, bookedBy: 'عمر وإبراهيم', bookedUserId: 'u_2', note: 'بلايستيشن', bookedAt: '2026-09-13T10:00:00Z' },
+      { id: '5', dayId: 'sun', time: '8:30 م - 10:30 م', isBooked: true, bookedBy: 'محمد سامي', bookedUserId: 'u_4', note: '', bookedAt: '2026-09-13T12:00:00Z' },
+
+      { id: '6', dayId: 'mon', time: '7:00 م - 9:00 م', isBooked: true, bookedBy: 'كريم ممدوح', bookedUserId: 'u_3', note: 'مشوار مهم', bookedAt: '2026-09-11T12:00:00Z' },
+      { id: '7', dayId: 'mon', time: '9:30 م - 11:30 م', isBooked: false, bookedBy: '', bookedUserId: '', note: '', bookedAt: null },
+
+      { id: '8', dayId: 'tue', time: '6:30 م - 8:30 م', isBooked: false, bookedBy: '', bookedUserId: '', note: '', bookedAt: null },
+      { id: '9', dayId: 'wed', time: '8:00 م - 10:00 م', isBooked: false, bookedBy: '', bookedUserId: '', note: '', bookedAt: null },
+
+      { id: '10', dayId: 'thu', time: '6:00 م - 8:00 م', isBooked: false, bookedBy: '', bookedUserId: '', note: '', bookedAt: null },
+      { id: '11', dayId: 'thu', time: '8:30 م - 11:30 م', isBooked: false, bookedBy: '', bookedUserId: '', note: '', bookedAt: null },
+
+      { id: '12', dayId: 'fri', time: '2:00 م - 4:30 م', isBooked: false, bookedBy: '', bookedUserId: '', note: '', bookedAt: null },
+      { id: '13', dayId: 'fri', time: '6:00 م - 8:30 م', isBooked: false, bookedBy: '', bookedUserId: '', note: '', bookedAt: null }
+    ];
+
+    // State
+    let slots = [];
+    let users = [];
+    let currentUser = null; // { id, username }
+    let isAdmin = false;
+    let rollingDays = [];
+    let selectedDayId = '';
+    let currentAuthMode = 'login'; // 'login' or 'register'
+
+    function calculateRollingDays() {
+      const result = [];
+      const now = new Date();
+
+      for (let i = 0; i < 7; i++) {
+        const d = new Date(now);
+        d.setDate(now.getDate() + i);
+
+        const jsDayIndex = d.getDay();
+        const baseDay = DAY_INDEX_MAP[jsDayIndex];
+        const dayNumber = d.getDate();
+        const monthNumber = d.getMonth() + 1;
+        const monthName = ARABIC_MONTHS[d.getMonth()];
+
+        result.push({
+          id: baseDay.id,
+          name: baseDay.name,
+          dateObj: d,
+          dateFormatted: `${dayNumber}/${monthNumber}`,
+          fullDateText: `${dayNumber} ${monthName}`,
+          isToday: i === 0,
+          isTomorrow: i === 1
+        });
+      }
+
+      rollingDays = result;
+      if (!selectedDayId || !rollingDays.some(d => d.id === selectedDayId)) {
+        selectedDayId = rollingDays[0].id;
+      }
+    }
+
+    function init() {
+      calculateRollingDays();
+
+      // Load Users
+      const savedUsers = localStorage.getItem(STORAGE_KEY_USERS);
+      if (savedUsers) {
+        try { users = JSON.parse(savedUsers); } catch(e) { users = INITIAL_USERS; }
+      } else {
+        users = INITIAL_USERS;
+        saveUsers();
+      }
+
+      // Load Current User
+      const savedAuth = localStorage.getItem(STORAGE_KEY_AUTH);
+      if (savedAuth) {
+        try { currentUser = JSON.parse(savedAuth); } catch(e) { currentUser = null; }
+      }
+
+      // Load Admin Status
+      const savedAdmin = localStorage.getItem(STORAGE_KEY_ADMIN);
+      isAdmin = (savedAdmin === 'true');
+
+      // Load Slots
+      const savedSlots = localStorage.getItem(STORAGE_KEY_SLOTS);
+      if (savedSlots) {
+        try { slots = JSON.parse(savedSlots); } catch(e) { slots = INITIAL_SLOTS; }
+      } else {
+        slots = INITIAL_SLOTS;
+        saveSlots();
+      }
+
+      const today = rollingDays[0];
+      const todayLabel = document.getElementById('currentDateDisplay');
+      if (todayLabel) {
+        todayLabel.textContent = `النهارده ${today.name} (${today.fullDateText})`;
+      }
+
+      renderUserHeader();
+      renderDaysTabs();
+      populateAddSlotDayOptions();
+      renderSlots();
+      updateAdminUI();
+
+      lucide.createIcons();
+    }
+
+    function saveSlots() {
+      localStorage.setItem(STORAGE_KEY_SLOTS, JSON.stringify(slots));
+    }
+
+    function saveUsers() {
+      localStorage.setItem(STORAGE_KEY_USERS, JSON.stringify(users));
+    }
+
+    function renderDaysTabs() {
+      const container = document.getElementById('daysTabsContainer');
+      container.innerHTML = '';
+
+      rollingDays.forEach(day => {
+        const daySlots = slots.filter(s => s.dayId === day.id);
+        const totalCount = daySlots.length;
+        const availableCount = daySlots.filter(s => !s.isBooked).length;
+        const isSelected = day.id === selectedDayId;
+        const hasAvailable = availableCount > 0;
+        const hasSlotsAtAll = totalCount > 0;
+
+        const button = document.createElement('button');
+        button.onclick = () => selectDay(day.id);
+
+        let activeClasses = '';
+        if (isSelected) {
+          if (hasAvailable) {
+            activeClasses = 'bg-emerald-950/70 border-emerald-400 text-white ring-2 ring-emerald-500/50 shadow-lg shadow-emerald-600/20 font-bold';
+          } else if (hasSlotsAtAll) {
+            activeClasses = 'bg-rose-950/70 border-rose-500 text-rose-100 ring-2 ring-rose-500/50 shadow-lg shadow-rose-900/30 font-bold';
+          } else {
+            activeClasses = 'bg-slate-900 border-slate-500 text-white ring-2 ring-slate-600/50 shadow-lg font-bold';
+          }
+        } else {
+          activeClasses = 'bg-slate-900/80 border-slate-800 text-slate-400 hover:text-white hover:bg-slate-900 hover:border-slate-700';
+        }
+
+        button.className = `relative flex flex-col items-center justify-center min-w-[5.8rem] h-[5.4rem] px-2.5 py-2 rounded-2xl border transition-all text-center shrink-0 select-none ${activeClasses}`;
+
+        let statusBadgeHtml = '';
+        if (hasAvailable) {
+          statusBadgeHtml = `<span class="text-[10px] mt-1 px-2 py-0.5 rounded-full ${isSelected ? 'bg-emerald-500/30 text-emerald-200 border border-emerald-400/50' : 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30'} font-semibold whitespace-nowrap">${availableCount} متاح</span>`;
+        } else if (hasSlotsAtAll) {
+          statusBadgeHtml = `<span class="text-[10px] mt-1 px-2 py-0.5 rounded-full ${isSelected ? 'bg-rose-500/30 text-rose-200 border border-rose-500/50' : 'bg-rose-500/15 text-rose-400 border border-rose-500/30'} font-semibold whitespace-nowrap">مكتمل</span>`;
+        } else {
+          statusBadgeHtml = `<span class="text-[10px] mt-1 px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700/60 font-medium whitespace-nowrap">لا يوجد معاد</span>`;
+        }
+
+        let todayTag = '';
+        if (day.isToday) {
+          if (hasAvailable) {
+            todayTag = `<span class="text-[9px] font-extrabold px-1.5 py-0.5 rounded-md bg-emerald-500/25 border border-emerald-500/50 text-emerald-300 leading-none mb-1">اليوم</span>`;
+          } else {
+            todayTag = `<span class="text-[9px] font-extrabold px-1.5 py-0.5 rounded-md bg-rose-500/25 border border-rose-500/50 text-rose-300 leading-none mb-1">اليوم</span>`;
+          }
+        }
+
+        button.innerHTML = `
+          ${todayTag}
+          <span class="text-sm font-bold leading-tight">${day.name}</span>
+          <span class="text-[11px] opacity-75 font-mono tracking-tight my-0.5">${day.dateFormatted}</span>
+          ${statusBadgeHtml}
+        `;
+
+        container.appendChild(button);
+      });
+    }
+
+    function selectDay(dayId) {
+      selectedDayId = dayId;
+      renderDaysTabs();
+      renderSlots();
+    }
+
+    function renderSlots() {
+      const currentDay = rollingDays.find(d => d.id === selectedDayId) || rollingDays[0];
+      const daySlots = slots.filter(s => s.dayId === selectedDayId);
+      const totalCount = daySlots.length;
+      const availableCount = daySlots.filter(s => !s.isBooked).length;
+
+      document.getElementById('selectedDayTitle').innerHTML = `
+        <i data-lucide="calendar" class="w-5 h-5 ${availableCount > 0 ? 'text-emerald-400' : (totalCount > 0 ? 'text-rose-400' : 'text-slate-400')} inline"></i>
+        <span>مواعيد يوم ${currentDay.name} (${currentDay.fullDateText})</span>
+      `;
+
+      const badge = document.getElementById('slotsCountBadge');
+      if (totalCount === 0) {
+        badge.textContent = "لا يوجد معاد متاح";
+        badge.className = "text-xs bg-slate-900 text-slate-400 px-3 py-1 rounded-full border border-slate-800 font-medium";
+      } else if (availableCount > 0) {
+        badge.textContent = `${availableCount} متاح من ${totalCount}`;
+        badge.className = "text-xs bg-emerald-500/15 text-emerald-300 px-3 py-1 rounded-full border border-emerald-500/30 font-semibold";
+      } else {
+        badge.textContent = `مكتمل (${totalCount} محجوز)`;
+        badge.className = "text-xs bg-rose-500/15 text-rose-300 px-3 py-1 rounded-full border border-rose-500/30 font-semibold";
+      }
+
+      const grid = document.getElementById('slotsGrid');
+      const emptyState = document.getElementById('emptyState');
+      grid.innerHTML = '';
+
+      if (daySlots.length === 0) {
+        emptyState.classList.remove('hidden');
+        grid.classList.add('hidden');
+        lucide.createIcons();
+        return;
+      } else {
+        emptyState.classList.add('hidden');
+        grid.classList.remove('hidden');
+      }
+
+      daySlots.forEach(slot => {
+        const card = document.createElement('div');
+        const isMine = currentUser && (slot.bookedUserId === currentUser.id || slot.bookedBy === currentUser.username);
+
+        if (slot.isBooked) {
+          if (isAdmin) {
+            // ADMIN VIEW: FULL DETAILS
+            card.className = "slot-card relative rounded-2xl p-4 sm:p-5 border border-rose-500/40 bg-gradient-to-br from-rose-950/40 via-slate-900 to-rose-950/20 shadow-md shadow-rose-950/30 flex flex-col justify-between overflow-hidden";
+            card.innerHTML = `
+              <div class="absolute top-0 right-0 left-0 h-1 bg-rose-500"></div>
+              <div>
+                <div class="flex items-start justify-between gap-2 mb-3">
+                  <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-rose-500/20 border border-rose-500/40 text-rose-300">
+                    <span class="w-2 h-2 rounded-full bg-rose-500"></span>
+                    محجوز (رؤية الأدمن)
+                  </span>
+                  <span class="text-xs text-slate-400 font-mono flex items-center gap-1">
+                    <i data-lucide="clock" class="w-3.5 h-3.5 text-rose-400"></i>
+                    ${slot.time}
+                  </span>
+                </div>
+
+                <h4 class="text-base font-bold text-rose-100 mb-1 flex items-center gap-2">
+                  <span>محجوز مع:</span>
+                  <span class="text-white font-extrabold underline decoration-rose-500/50">${escapeHtml(slot.bookedBy)}</span>
+                </h4>
+
+                ${slot.note ? `<p class="text-xs text-amber-300/90 mt-2 bg-slate-950/60 p-2 rounded-lg border border-slate-800"><span class="font-bold text-slate-400">الموضوع:</span> "${escapeHtml(slot.note)}"</p>` : ''}
+              </div>
+
+              <div class="mt-4 pt-3 border-t border-rose-500/20 flex items-center justify-between gap-2">
+                <button onclick="freeSlot('${slot.id}')" class="w-full bg-rose-600 hover:bg-rose-500 text-white font-bold py-2 px-3 rounded-xl text-xs transition flex items-center justify-center gap-1.5 shadow-sm">
+                  <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+                  إلغاء وتفريغ المعاد (أدمن)
+                </button>
+              </div>
+            `;
+          } else if (isMine) {
+            // BOOKED BY CURRENT LOGGED-IN USER: Subtle dark amber gradient matching red card design
+            card.className = "slot-card relative rounded-2xl p-4 sm:p-5 border border-amber-500/40 bg-gradient-to-br from-amber-950/35 via-slate-900 to-amber-950/20 shadow-md shadow-amber-950/30 flex flex-col justify-between overflow-hidden";
+            card.innerHTML = `
+              <div class="absolute top-0 right-0 left-0 h-1 bg-amber-400"></div>
+              <div>
+                <div class="flex items-start justify-between gap-2 mb-3">
+                  <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-amber-500/20 border border-amber-500/40 text-amber-300">
+                    <span class="w-2 h-2 rounded-full bg-amber-400 pulse-subtle"></span>
+                    حجزك أنت
+                  </span>
+                  <span class="text-xs text-slate-400 font-mono flex items-center gap-1">
+                    <i data-lucide="clock" class="w-3.5 h-3.5 text-amber-400"></i>
+                    ${slot.time}
+                  </span>
+                </div>
+
+                <div class="py-1">
+                  <h4 class="text-base font-bold text-amber-100 mb-1 flex items-center gap-2">
+                    <i data-lucide="calendar-check" class="w-4 h-4 text-amber-400"></i>
+                    <span>معادك محجوز بنجاح</span>
+                  </h4>
+                  ${slot.note ? `<div class="text-xs text-amber-200/90 mt-2 bg-slate-950/70 p-2.5 rounded-xl border border-amber-500/20">ملاحظتك: "${escapeHtml(slot.note)}"</div>` : ''}
+                </div>
+              </div>
+
+              <div class="mt-4 pt-3 border-t border-amber-500/20 flex items-center justify-between gap-2">
+                <button onclick="cancelMySlot('${slot.id}')" class="w-full bg-amber-500/15 hover:bg-amber-400 hover:text-slate-950 border border-amber-500/40 text-amber-300 font-bold py-2 px-3 rounded-xl text-xs transition-all duration-200 flex items-center justify-center gap-1.5 shadow-sm">
+                  <i data-lucide="x-circle" class="w-3.5 h-3.5"></i>
+                  <span>إلغاء حجزي</span>
+                </button>
+              </div>
+            `;
+          } else {
+            // BOOKED BY SOMEONE ELSE: STRICTLY PRIVACY SECURED (NO NAMES, NO TOPIC)
+            card.className = "slot-card relative rounded-2xl p-4 sm:p-5 border border-rose-500/40 bg-gradient-to-br from-rose-950/35 via-slate-900 to-rose-950/20 shadow-md shadow-rose-950/30 flex flex-col justify-between overflow-hidden";
+            card.innerHTML = `
+              <div class="absolute top-0 right-0 left-0 h-1 bg-rose-500"></div>
+              <div>
+                <div class="flex items-start justify-between gap-2 mb-3">
+                  <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-rose-500/20 border border-rose-500/40 text-rose-300">
+                    <span class="w-2 h-2 rounded-full bg-rose-500"></span>
+                    غير متاح / محجوز
+                  </span>
+                  <span class="text-xs text-slate-400 font-mono flex items-center gap-1">
+                    <i data-lucide="clock" class="w-3.5 h-3.5 text-rose-400"></i>
+                    ${slot.time}
+                  </span>
+                </div>
+
+                <div class="py-2">
+                  <h4 class="text-base font-bold text-rose-200/90 mb-1 flex items-center gap-2">
+                    <i data-lucide="lock" class="w-4 h-4 text-rose-400"></i>
+                    <span>المعاد ده محجوز بالفعل</span>
+                  </h4>
+                </div>
+              </div>
+
+              <div class="mt-4 pt-3 border-t border-rose-500/20 flex items-center justify-between gap-2">
+                <div class="w-full text-center py-2 px-3 rounded-xl bg-slate-950/80 border border-slate-800 text-slate-400 text-xs font-semibold flex items-center justify-center gap-2 cursor-not-allowed">
+                  <i data-lucide="lock" class="w-3.5 h-3.5 text-rose-400"></i>
+                  المعاد مقفول
+                </div>
+              </div>
+            `;
+          }
+        } else {
+          // AVAILABLE STATE: Matches the dark gradient aesthetic with emerald accents
+          card.className = "slot-card group relative rounded-2xl p-4 sm:p-5 border border-emerald-500/35 bg-gradient-to-br from-emerald-950/30 via-slate-900 to-emerald-950/15 shadow-md shadow-emerald-950/20 hover:border-emerald-500/60 flex flex-col justify-between cursor-pointer overflow-hidden";
+          
+          card.innerHTML = `
+            <div class="absolute top-0 right-0 left-0 h-1 bg-emerald-500/50 group-hover:bg-emerald-400 transition"></div>
+            <div>
+              <div class="flex items-start justify-between gap-2 mb-3">
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-500/15 border border-emerald-500/30 text-emerald-300">
+                  <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                  فاضي ومتاح
+                </span>
+                <span class="text-xs text-slate-400 font-mono flex items-center gap-1">
+                  <i data-lucide="clock" class="w-3.5 h-3.5 text-emerald-400"></i>
+                  ${slot.time}
+                </span>
+              </div>
+
+              <h4 class="text-base font-bold text-white mb-1 group-hover:text-emerald-300 transition">
+                معاد متاح
+              </h4>
+            </div>
+
+            <div class="mt-4 pt-3 border-t border-emerald-500/20 flex items-center justify-between gap-2">
+              <button onclick="openBookModal('${slot.id}')" class="w-full bg-emerald-600/90 hover:bg-emerald-500 text-white font-bold py-2 px-3 rounded-xl text-xs sm:text-sm transition flex items-center justify-center gap-1.5 shadow-md shadow-emerald-700/20">
+                <i data-lucide="calendar-plus" class="w-4 h-4"></i>
+                احجز المعاد ده معايا
+              </button>
+
+              ${isAdmin ? `
+                <button onclick="deleteSlot('${slot.id}')" title="مسح المعاد نهائياً" class="p-2 rounded-xl text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 border border-transparent hover:border-rose-500/30 transition">
+                  <i data-lucide="trash-2" class="w-4 h-4"></i>
+                </button>
+              ` : ''}
+            </div>
+          `;
+        }
+
+        grid.appendChild(card);
+      });
+
+      lucide.createIcons();
+    }
+
+    function renderUserHeader() {
+      const container = document.getElementById('userHeaderArea');
+      container.innerHTML = '';
+
+      if (currentUser) {
+        // Logged In
+        const mySlotsCount = slots.filter(s => s.isBooked && (s.bookedUserId === currentUser.id || s.bookedBy === currentUser.username)).length;
+        
+        container.innerHTML = `
+          <div class="flex items-center gap-1.5 bg-slate-800/80 border border-slate-700 px-2.5 py-1.5 rounded-xl text-xs">
+            <i data-lucide="user" class="w-3.5 h-3.5 text-emerald-400"></i>
+            <span class="font-bold text-white max-w-[90px] sm:max-w-none truncate">${escapeHtml(currentUser.username)}</span>
+          </div>
+          <button onclick="openMyBookingsModal()" class="relative px-2.5 py-1.5 sm:px-3 sm:py-2 text-xs font-semibold rounded-xl bg-emerald-950/60 border border-emerald-500/40 text-emerald-300 hover:bg-emerald-900/60 transition flex items-center gap-1">
+            <i data-lucide="calendar-check-2" class="w-3.5 h-3.5"></i>
+            <span>مواعيدي</span>
+            ${mySlotsCount > 0 ? `<span class="bg-emerald-500 text-slate-950 text-[10px] font-extrabold px-1.5 rounded-full">${mySlotsCount}</span>` : ''}
+          </button>
+          <button onclick="logoutUser()" title="تسجيل خروج" class="p-1.5 sm:p-2 text-slate-400 hover:text-rose-400 hover:bg-slate-800 rounded-xl transition">
+            <i data-lucide="log-out" class="w-4 h-4"></i>
+          </button>
+        `;
+      } else {
+        // Logged Out
+        container.innerHTML = `
+          <button onclick="openUserAuthModal('login')" class="flex items-center gap-1 px-3 py-1.5 sm:px-3.5 sm:py-2 text-xs sm:text-sm font-semibold rounded-xl bg-emerald-600/20 hover:bg-emerald-600/30 border border-emerald-500/40 text-emerald-300 transition">
+            <i data-lucide="user-circle-2" class="w-4 h-4"></i>
+            <span>دخول / تسجيل حساب</span>
+          </button>
+        `;
+      }
+      lucide.createIcons();
+    }
+
+    function openUserAuthModal(mode = 'login') {
+      currentAuthMode = mode;
+      switchAuthMode(mode);
+      document.getElementById('authUsername').value = '';
+      document.getElementById('authPassword').value = '';
+      document.getElementById('authErrorMsg').classList.add('hidden');
+      document.getElementById('userAuthModal').classList.remove('hidden');
+      document.getElementById('authUsername').focus();
+      lucide.createIcons();
+    }
+
+    function closeUserAuthModal() {
+      document.getElementById('userAuthModal').classList.add('hidden');
+    }
+
+    function switchAuthMode(mode) {
+      currentAuthMode = mode;
+      const tabLogin = document.getElementById('tabLoginBtn');
+      const tabRegister = document.getElementById('tabRegisterBtn');
+      const modalTitle = document.getElementById('authModalTitle');
+      const modalSubtitle = document.getElementById('authModalSubtitle');
+      const submitLabel = document.getElementById('authSubmitLabel');
+      document.getElementById('authErrorMsg').classList.add('hidden');
+
+      if (mode === 'login') {
+        tabLogin.className = "flex-1 py-1.5 rounded-lg transition bg-slate-800 text-white shadow-sm";
+        tabRegister.className = "flex-1 py-1.5 rounded-lg transition text-slate-400 hover:text-white";
+        modalTitle.textContent = "تسجيل الدخول لحسابك";
+        modalSubtitle.textContent = "سجل دخولك عشان تقدر تحجز وتتابع مواعيدك";
+        submitLabel.textContent = "تسجيل الدخول";
+      } else {
+        tabRegister.className = "flex-1 py-1.5 rounded-lg transition bg-slate-800 text-white shadow-sm";
+        tabLogin.className = "flex-1 py-1.5 rounded-lg transition text-slate-400 hover:text-white";
+        modalTitle.textContent = "إنشاء حساب جديد";
+        modalSubtitle.textContent = "اكتب اسمك وباسورد عشان تتابع مواعيدك وتلغيها براحتك";
+        submitLabel.textContent = "إنشاء الحساب الآن";
+      }
+    }
+
+    function handleUserAuthSubmit(e) {
+      e.preventDefault();
+      const username = document.getElementById('authUsername').value.trim();
+      const password = document.getElementById('authPassword').value.trim();
+      const errorEl = document.getElementById('authErrorMsg');
+
+      if (!username || !password) {
+        errorEl.textContent = 'من فضلك املأ اسم المستخدم وكلمة المرور';
+        errorEl.classList.remove('hidden');
+        return;
+      }
+
+      if (currentAuthMode === 'login') {
+        const found = users.find(u => u.username.toLowerCase() === username.toLowerCase());
+        if (!found || found.password !== password) {
+          errorEl.textContent = 'اسم المستخدم أو كلمة المرور غير صحيحة!';
+          errorEl.classList.remove('hidden');
+          return;
+        }
+        currentUser = { id: found.id, username: found.username };
+        localStorage.setItem(STORAGE_KEY_AUTH, JSON.stringify(currentUser));
+        closeUserAuthModal();
+        renderUserHeader();
+        renderSlots();
+        showToast(`أهلاً بيك يا ${currentUser.username}! تم تسجيل الدخول بنجاح.`, 'success');
+      } else {
+        // Register
+        const exists = users.some(u => u.username.toLowerCase() === username.toLowerCase());
+        if (exists) {
+          errorEl.textContent = 'اسم المستخدم ده مسجل قبل كده! اختار اسم تاني أو سجل دخول.';
+          errorEl.classList.remove('hidden');
+          return;
+        }
+
+        const newUser = {
+          id: 'u_' + Date.now(),
+          username: username,
+          password: password
+        };
+        users.push(newUser);
+        saveUsers();
+
+        currentUser = { id: newUser.id, username: newUser.username };
+        localStorage.setItem(STORAGE_KEY_AUTH, JSON.stringify(currentUser));
+        closeUserAuthModal();
+        renderUserHeader();
+        renderSlots();
+        showToast(`مبروك يا ${currentUser.username}! تم إنشاء حسابك وتسجيل دخولك فوراً.`, 'success');
+      }
+    }
+
+    function logoutUser() {
+      const name = currentUser ? currentUser.username : '';
+      currentUser = null;
+      localStorage.removeItem(STORAGE_KEY_AUTH);
+      renderUserHeader();
+      renderSlots();
+      showToast(`تم تسجيل الخروج. في أمان الله يا ${name}!`, 'info');
+    }
+
+    function openMyBookingsModal() {
+      if (!currentUser) return;
+      const modal = document.getElementById('myBookingsModal');
+      document.getElementById('myBookingsUserLabel').textContent = `حساب: ${currentUser.username}`;
+      const list = document.getElementById('myBookingsList');
+      list.innerHTML = '';
+
+      const myBookings = slots.filter(s => s.isBooked && (s.bookedUserId === currentUser.id || s.bookedBy === currentUser.username));
+
+      if (myBookings.length === 0) {
+        list.innerHTML = `
+          <div class="text-center py-8 text-slate-500">
+            <i data-lucide="calendar-off" class="w-8 h-8 mx-auto mb-2 opacity-50"></i>
+            <p class="text-xs">معندكش أي مواعيد محجوزة حالياً.</p>
+          </div>
+        `;
+      } else {
+        myBookings.forEach(slot => {
+          const day = rollingDays.find(d => d.id === slot.dayId);
+          const dayText = day ? `${day.name} (${day.fullDateText})` : slot.dayId;
+          const div = document.createElement('div');
+          div.className = "flex items-center justify-between p-3 rounded-2xl bg-slate-950 border border-slate-800 text-xs";
+          div.innerHTML = `
+            <div>
+              <div class="font-bold text-white text-sm">${dayText}</div>
+              <div class="text-emerald-400 font-mono mt-0.5">${slot.time}</div>
+              ${slot.note ? `<div class="text-slate-400 text-[11px] mt-1">موضوعك: "${escapeHtml(slot.note)}"</div>` : ''}
+            </div>
+            <button onclick="cancelMySlot('${slot.id}')" class="px-3 py-1.5 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 border border-rose-500/30 text-rose-300 font-bold transition flex items-center gap-1">
+              <i data-lucide="x" class="w-3.5 h-3.5"></i>
+              إلغاء
+            </button>
+          `;
+          list.appendChild(div);
+        });
+      }
+
+      modal.classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function closeMyBookingsModal() {
+      document.getElementById('myBookingsModal').classList.add('hidden');
+    }
+
+    function cancelMySlot(slotId) {
+      const slot = slots.find(s => s.id === slotId);
+      if (!slot) return;
+
+      // Ensure user owns this slot or is admin
+      const isOwner = currentUser && (slot.bookedUserId === currentUser.id || slot.bookedBy === currentUser.username);
+      if (!isOwner && !isAdmin) {
+        showToast('تقدر تلغي حجزك إنت فقط!', 'error');
+        return;
+      }
+
+      slot.isBooked = false;
+      slot.bookedBy = '';
+      slot.bookedUserId = '';
+      slot.note = '';
+      slot.bookedAt = null;
+
+      saveSlots();
+      renderDaysTabs();
+      renderSlots();
+      renderUserHeader();
+
+      // Check if the myBookingsModal is currently open; if so, update its list or close it if empty
+      const myBookingsModal = document.getElementById('myBookingsModal');
+      if (myBookingsModal && !myBookingsModal.classList.contains('hidden')) {
+        const remainingBookings = slots.filter(s => s.isBooked && (s.bookedUserId === currentUser.id || s.bookedBy === currentUser.username));
+        if (remainingBookings.length === 0) {
+          closeMyBookingsModal();
+        } else {
+          openMyBookingsModal();
+        }
+      }
+
+      showToast('تم إلغاء حجز المعاد ورجع متاح مجدداً.', 'info');
+    }
+
+    function openBookModal(slotId) {
+      if (!currentUser) {
+        showToast('من فضلك سجل دخولك أو أنشئ حساب سريعاً عشان تقدر تحجز المعاد وتتابعه!', 'info');
+        openUserAuthModal('register');
+        return;
+      }
+
+      const slot = slots.find(s => s.id === slotId);
+      if (!slot || slot.isBooked) return;
+
+      const day = rollingDays.find(d => d.id === slot.dayId);
+      document.getElementById('bookingSlotId').value = slot.id;
+      document.getElementById('modalSlotTime').textContent = `يوم ${day ? `${day.name} (${day.fullDateText})` : ''} • الساعة ${slot.time}`;
+      document.getElementById('bookerName').value = currentUser.username;
+      document.getElementById('bookerNote').value = '';
+
+      document.getElementById('bookModal').classList.remove('hidden');
+      document.getElementById('bookerNote').focus();
+      lucide.createIcons();
+    }
+
+    function closeBookModal() {
+      document.getElementById('bookModal').classList.add('hidden');
+    }
+
+    function handleBookingSubmit(e) {
+      e.preventDefault();
+      const slotId = document.getElementById('bookingSlotId').value;
+      const name = document.getElementById('bookerName').value.trim();
+      const note = document.getElementById('bookerNote').value.trim();
+
+      if (!name) {
+        showToast('لازم تكتب اسمك عشان يتم الحجز!', 'error');
+        return;
+      }
+
+      const slotIndex = slots.findIndex(s => s.id === slotId);
+      if (slotIndex === -1) return;
+
+      if (slots[slotIndex].isBooked) {
+        showToast('عفواً، المعاد ده اتحجز خلاص!', 'error');
+        closeBookModal();
+        renderSlots();
+        return;
+      }
+
+      slots[slotIndex].isBooked = true;
+      slots[slotIndex].bookedBy = name;
+      slots[slotIndex].bookedUserId = currentUser ? currentUser.id : '';
+      slots[slotIndex].note = note;
+      slots[slotIndex].bookedAt = new Date().toISOString();
+
+      saveSlots();
+      closeBookModal();
+      renderDaysTabs();
+      renderSlots();
+      renderUserHeader();
+
+      showToast(`تسلم يا ${name}! المعاد اتحجز بنجاح ومستنيك 🎉`, 'success');
+    }
+
+    function openAdminAuthModal() {
+      if (isAdmin) return;
+      document.getElementById('adminPin').value = '';
+      document.getElementById('pinErrorMsg').classList.add('hidden');
+      document.getElementById('adminAuthModal').classList.remove('hidden');
+      document.getElementById('adminPin').focus();
+      lucide.createIcons();
+    }
+
+    function closeAdminAuthModal() {
+      document.getElementById('adminAuthModal').classList.add('hidden');
+    }
+
+    function handleAdminAuth(e) {
+      e.preventDefault();
+      const enteredPin = document.getElementById('adminPin').value;
+
+      if (enteredPin === ADMIN_PIN) {
+        isAdmin = true;
+        localStorage.setItem(STORAGE_KEY_ADMIN, 'true');
+        closeAdminAuthModal();
+        updateAdminUI();
+        renderSlots();
+        showToast('أهلاً بيك يا كبير! تم تفعيل وضع الأدمن والتحكم الكامل.', 'success');
+      } else {
+        document.getElementById('pinErrorMsg').classList.remove('hidden');
+      }
+    }
+
+    function logoutAdmin() {
+      isAdmin = false;
+      localStorage.setItem(STORAGE_KEY_ADMIN, 'false');
+      updateAdminUI();
+      renderSlots();
+      showToast('تم الخروج من وضع الأدمن بنجاح.', 'info');
+    }
+
+    function updateAdminUI() {
+      const banner = document.getElementById('adminBanner');
+      const btn = document.getElementById('adminToggleBtn');
+      const btnLabel = document.getElementById('adminBtnLabel');
+
+      if (isAdmin) {
+        banner.classList.remove('hidden');
+        btn.classList.add('bg-amber-500/20', 'border-amber-500/50', 'text-amber-300');
+        btnLabel.textContent = 'أدمن نشط';
+      } else {
+        banner.classList.add('hidden');
+        btn.classList.remove('bg-amber-500/20', 'border-amber-500/50', 'text-amber-300');
+        btnLabel.textContent = 'دخول الأدمن';
+      }
+      lucide.createIcons();
+    }
+
+    function freeSlot(slotId) {
+      if (!isAdmin) return;
+      const slot = slots.find(s => s.id === slotId);
+      if (!slot) return;
+
+      slot.isBooked = false;
+      slot.bookedBy = '';
+      slot.bookedUserId = '';
+      slot.note = '';
+      slot.bookedAt = null;
+
+      saveSlots();
+      renderDaysTabs();
+      renderSlots();
+      renderUserHeader();
+      showToast('تم إلغاء الحجز وتفريغ المعاد للأدمن.', 'info');
+    }
+
+    function deleteSlot(slotId) {
+      if (!isAdmin) return;
+      slots = slots.filter(s => s.id !== slotId);
+      saveSlots();
+      renderDaysTabs();
+      renderSlots();
+      renderUserHeader();
+      showToast('تم حذف المعاد نهائياً.', 'info');
+    }
+
+    function openAccountsModal() {
+      if (!isAdmin) return;
+      renderAccountsTable();
+      document.getElementById('newAdminUsername').value = '';
+      document.getElementById('newAdminPassword').value = '';
+      document.getElementById('accountsModal').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function closeAccountsModal() {
+      document.getElementById('accountsModal').classList.add('hidden');
+    }
+
+    function renderAccountsTable() {
+      const tbody = document.getElementById('accountsTableBody');
+      tbody.innerHTML = '';
+
+      if (users.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-slate-500">لا يوجد أي حسابات مسجلة بعد.</td></tr>`;
+        return;
+      }
+
+      users.forEach(u => {
+        const userSlotsCount = slots.filter(s => s.isBooked && (s.bookedUserId === u.id || s.bookedBy === u.username)).length;
+        const tr = document.createElement('tr');
+        tr.className = "hover:bg-slate-950/40 transition";
+        tr.innerHTML = `
+          <td class="p-3 font-bold text-white flex items-center gap-1.5">
+            <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+            ${escapeHtml(u.username)}
+          </td>
+          <td class="p-3 font-mono text-amber-300">${escapeHtml(u.password)}</td>
+          <td class="p-3 text-center">
+            <span class="px-2 py-0.5 rounded-full ${userSlotsCount > 0 ? 'bg-emerald-500/20 text-emerald-300 font-bold border border-emerald-500/30' : 'bg-slate-800 text-slate-400'}">
+              ${userSlotsCount} حجز
+            </span>
+          </td>
+          <td class="p-3 text-left">
+            <button onclick="deleteAccountByAdmin('${u.id}')" class="px-2.5 py-1 rounded-lg bg-rose-500/15 hover:bg-rose-500/30 border border-rose-500/30 text-rose-300 font-bold transition flex items-center gap-1 text-xs">
+              <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+              حذف الحساب
+            </button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+      lucide.createIcons();
+    }
+
+    function handleAdminCreateAccount(e) {
+      e.preventDefault();
+      if (!isAdmin) return;
+
+      const username = document.getElementById('newAdminUsername').value.trim();
+      const password = document.getElementById('newAdminPassword').value.trim();
+
+      if (!username || !password) return;
+
+      if (users.some(u => u.username.toLowerCase() === username.toLowerCase())) {
+        showToast('اسم المستخدم ده موجود بالفعل!', 'error');
+        return;
+      }
+
+      const newUser = {
+        id: 'u_' + Date.now(),
+        username: username,
+        password: password
+      };
+
+      users.push(newUser);
+      saveUsers();
+      renderAccountsTable();
+      document.getElementById('newAdminUsername').value = '';
+      document.getElementById('newAdminPassword').value = '';
+      showToast(`تم إنشاء حساب "${username}" بنجاح!`, 'success');
+    }
+
+    function deleteAccountByAdmin(userId) {
+      if (!isAdmin) return;
+      const targetUser = users.find(u => u.id === userId);
+      if (!targetUser) return;
+
+      // Free any slots booked by this user
+      slots.forEach(s => {
+        if (s.bookedUserId === userId || s.bookedBy === targetUser.username) {
+          s.isBooked = false;
+          s.bookedBy = '';
+          s.bookedUserId = '';
+          s.note = '';
+          s.bookedAt = null;
+        }
+      });
+      saveSlots();
+
+      // Delete from users array
+      users = users.filter(u => u.id !== userId);
+      saveUsers();
+
+      // If current logged-in user was deleted, log them out
+      if (currentUser && currentUser.id === userId) {
+        logoutUser();
+      }
+
+      renderAccountsTable();
+      renderDaysTabs();
+      renderSlots();
+      renderUserHeader();
+      showToast(`تم حذف حساب "${targetUser.username}" وتفريغ المواعيد الخاصة به.`, 'info');
+    }
+
+    function populateAddSlotDayOptions() {
+      const select = document.getElementById('newSlotDay');
+      if (!select) return;
+      select.innerHTML = '';
+      rollingDays.forEach(day => {
+        const opt = document.createElement('option');
+        opt.value = day.id;
+        opt.textContent = `${day.name} (${day.fullDateText})`;
+        select.appendChild(opt);
+      });
+    }
+
+    function openAddSlotModal() {
+      if (!isAdmin) return;
+      document.getElementById('newSlotDay').value = selectedDayId;
+      document.getElementById('startTime').value = '';
+      document.getElementById('endTime').value = '';
+      document.getElementById('addSlotModal').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function closeAddSlotModal() {
+      document.getElementById('addSlotModal').classList.add('hidden');
+    }
+
+    function handleAddSlotSubmit(e) {
+      e.preventDefault();
+      if (!isAdmin) return;
+
+      const dayId = document.getElementById('newSlotDay').value;
+      const start = document.getElementById('startTime').value.trim();
+      const end = document.getElementById('endTime').value.trim();
+
+      const newSlot = {
+        id: 'slot_' + Date.now(),
+        dayId: dayId,
+        time: `${start} - ${end}`,
+        isBooked: false,
+        bookedBy: '',
+        bookedUserId: '',
+        note: '',
+        bookedAt: null
+      };
+
+      slots.push(newSlot);
+      saveSlots();
+      closeAddSlotModal();
+      
+      if (selectedDayId !== dayId) {
+        selectedDayId = dayId;
+      }
+      
+      renderDaysTabs();
+      renderSlots();
+      showToast('تمت إضافة المعاد الجديد بنجاح!', 'success');
+    }
+
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+      
+      let borderBgClass = 'bg-slate-900 border-slate-700 text-white';
+      let icon = 'info';
+
+      if (type === 'success') {
+        borderBgClass = 'bg-emerald-950/95 border-emerald-500/40 text-emerald-200';
+        icon = 'check-circle-2';
+      } else if (type === 'error') {
+        borderBgClass = 'bg-rose-950/95 border-rose-500/40 text-rose-200';
+        icon = 'alert-triangle';
+      }
+
+      toast.className = `pointer-events-auto flex items-center gap-2.5 p-3.5 rounded-2xl border shadow-xl backdrop-blur text-xs sm:text-sm font-medium transition duration-300 transform translate-y-2 opacity-0 ${borderBgClass}`;
+      toast.innerHTML = `
+        <i data-lucide="${icon}" class="w-4 h-4 shrink-0"></i>
+        <span class="flex-1">${escapeHtml(message)}</span>
+      `;
+
+      container.appendChild(toast);
+      lucide.createIcons();
+
+      requestAnimationFrame(() => {
+        toast.classList.remove('translate-y-2', 'opacity-0');
+      });
+
+      setTimeout(() => {
+        toast.classList.add('opacity-0', 'translate-y-2');
+        setTimeout(() => toast.remove(), 300);
+      }, 4000);
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    window.onload = () => {
+      init();
+    };
+  </script>
+</body>
+</html>
