@@ -95,20 +95,15 @@
 
       <!-- Action Buttons -->
       <div class="flex items-center flex-wrap justify-center gap-2.5">
-        <!-- User Status / Auth -->
-        <div id="userSection" class="flex items-center gap-2">
-          <!-- Populated by JS -->
-        </div>
-
-        <!-- Admin Trigger Button -->
-        <button id="adminToggleBtn" onclick="toggleAdminPrompt()" class="text-xs font-bold px-3 py-2 rounded-xl bg-slate-900 border border-slate-700/70 text-slate-300 hover:text-white hover:border-slate-500 transition-all flex items-center gap-1.5">
+        <div id="userSection" class="flex items-center gap-2"></div>
+        <button id="adminToggleBtn" onclick="openAdminPinModal()" class="text-xs font-bold px-3 py-2 rounded-xl bg-slate-900 border border-slate-700/70 text-slate-300 hover:text-white hover:border-slate-500 transition-all flex items-center gap-1.5">
           <i data-lucide="shield" class="w-3.5 h-3.5 text-amber-400"></i>
           <span>دخول الأدمن</span>
         </button>
       </div>
     </header>
 
-    <!-- Admin Panel Bar (Hidden by default) -->
+    <!-- Admin Panel Bar -->
     <div id="adminBanner" class="hidden mb-6 p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-200 flex flex-wrap items-center justify-between gap-3 shadow-lg shadow-amber-500/5">
       <div class="flex items-center gap-2.5">
         <span class="p-2 rounded-xl bg-amber-500/20 text-amber-300">
@@ -140,9 +135,7 @@
         <i data-lucide="calendar-days" class="w-4 h-4 text-emerald-400"></i>
         <span>اختر اليوم لعرض وحجز المواعيد:</span>
       </div>
-      <div id="daysContainer" class="flex items-center gap-2.5 overflow-x-auto pb-3 pt-1 px-1 custom-scrollbar">
-        <!-- Day cards rendered dynamically -->
-      </div>
+      <div id="daysContainer" class="flex items-center gap-2.5 overflow-x-auto pb-3 pt-1 px-1 custom-scrollbar"></div>
     </div>
 
     <!-- Active Day Header -->
@@ -152,17 +145,13 @@
           مواعيد اليوم
         </h2>
       </div>
-      <div id="daySummaryBadge" class="text-xs px-3 py-1 rounded-full font-bold">
-        <!-- Injected by JS -->
-      </div>
+      <div id="daySummaryBadge" class="text-xs px-3 py-1 rounded-full font-bold"></div>
     </div>
 
     <!-- Slots Grid Container -->
-    <div id="slotsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-      <!-- Slot cards rendered dynamically -->
-    </div>
+    <div id="slotsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
 
-    <!-- Empty State if No Slots -->
+    <!-- Empty State -->
     <div id="emptyState" class="hidden text-center py-16 px-4 bg-slate-900/40 rounded-3xl border border-dashed border-slate-800">
       <div class="w-14 h-14 mx-auto rounded-2xl bg-slate-800/80 flex items-center justify-center text-slate-400 mb-3">
         <i data-lucide="calendar-x-2" class="w-7 h-7"></i>
@@ -171,6 +160,47 @@
       <p class="text-xs text-slate-400">تابع الأيام التانية أو انتظر إضافة مواعيد جديدة قريباً.</p>
     </div>
 
+  </div>
+
+  <!-- Custom Admin PIN Modal -->
+  <div id="adminPinModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+    <div class="bg-slate-900 border border-slate-700/80 rounded-3xl max-w-xs w-full p-6 shadow-2xl relative text-center">
+      <button onclick="closeAdminPinModal()" class="absolute top-4 left-4 p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-all">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+
+      <div class="w-12 h-12 mx-auto rounded-2xl bg-amber-500/20 text-amber-400 flex items-center justify-center border border-amber-500/30 mb-3">
+        <i data-lucide="shield" class="w-6 h-6"></i>
+      </div>
+      <h3 class="text-base font-bold text-white mb-1">دخول الأدمن</h3>
+      <p class="text-xs text-slate-400 mb-4">أدخل الرمز السري للتحكم</p>
+
+      <input type="password" id="adminPinInput" maxlength="10" placeholder="••••" class="w-full text-center tracking-widest text-lg font-bold bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-amber-500 mb-3">
+
+      <button onclick="submitAdminPin()" class="w-full py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-sm transition-all shadow-lg shadow-amber-500/20">
+        تأكيد الدخول
+      </button>
+    </div>
+  </div>
+
+  <!-- Custom Confirmation Dialog Modal -->
+  <div id="confirmModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+    <div class="bg-slate-900 border border-slate-700/80 rounded-3xl max-w-sm w-full p-6 shadow-2xl relative text-center">
+      <div class="w-12 h-12 mx-auto rounded-2xl bg-rose-500/20 text-rose-400 flex items-center justify-center border border-rose-500/30 mb-3">
+        <i data-lucide="alert-triangle" class="w-6 h-6"></i>
+      </div>
+      <h3 id="confirmTitle" class="text-base font-bold text-white mb-1.5">تأكيد الإجراء</h3>
+      <p id="confirmMessage" class="text-xs text-slate-400 mb-5 leading-relaxed"></p>
+
+      <div class="flex items-center gap-2">
+        <button id="confirmYesBtn" class="flex-1 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs transition-all shadow-lg shadow-rose-600/20">
+          نعم، تأكيد
+        </button>
+        <button onclick="closeConfirmModal()" class="flex-1 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs transition-all">
+          إلغاء
+        </button>
+      </div>
+    </div>
   </div>
 
   <!-- Booking Modal -->
@@ -188,10 +218,6 @@
           <h3 class="text-base font-bold text-white">تأكيد حجز المعاد</h3>
           <p id="bookingModalTime" class="text-xs text-slate-400"></p>
         </div>
-      </div>
-
-      <div id="bookingModalAuthAlert" class="mb-4 p-3 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-xs text-amber-300 hidden">
-        لو حابب تقدر تلغي المعاد ده بنفسك بعدين، يفضل تسجل دخول أولاً.
       </div>
 
       <div class="space-y-4">
@@ -266,9 +292,7 @@
         </div>
       </div>
 
-      <div id="myBookingsList" class="space-y-2.5 max-h-72 overflow-y-auto custom-scrollbar">
-        <!-- Rendered by JS -->
-      </div>
+      <div id="myBookingsList" class="space-y-2.5 max-h-72 overflow-y-auto custom-scrollbar"></div>
     </div>
   </div>
 
@@ -289,7 +313,6 @@
         </div>
       </div>
 
-      <!-- Add User by Admin -->
       <div class="p-3.5 rounded-2xl bg-slate-950 border border-slate-800 mb-4">
         <h4 class="text-xs font-bold text-slate-300 mb-2">إضافة حساب جديد يدوياً</h4>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-2">
@@ -301,10 +324,7 @@
         </button>
       </div>
 
-      <!-- Users List -->
-      <div class="space-y-2 max-h-60 overflow-y-auto custom-scrollbar" id="adminUsersList">
-        <!-- Rendered by JS -->
-      </div>
+      <div class="space-y-2 max-h-60 overflow-y-auto custom-scrollbar" id="adminUsersList"></div>
     </div>
   </div>
 
@@ -343,11 +363,8 @@
     <span id="toastMsg"></span>
   </div>
 
-  <!-- Script: Logic & Firebase Integration -->
+  <!-- Scripts -->
   <script>
-    // -------------------------------------------------------------
-    // Firebase Configuration
-    // -------------------------------------------------------------
     const firebaseConfig = {
       apiKey: "AIzaSyCv5MDv3LI0twtcvvRfcQ85dq8A5AXuW1E",
       authDomain: "schedule-app-eaeb3.firebaseapp.com",
@@ -361,70 +378,50 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    // -------------------------------------------------------------
-    // State & Constants
-    // -------------------------------------------------------------
     const ADMIN_PIN = "3276";
     let isAdmin = false;
     let currentUser = JSON.parse(localStorage.getItem('schedule_current_user') || 'null');
     let activeDayIndex = 0;
     let selectedSlotId = null;
     let authMode = 'login';
+    let onConfirmCallback = null;
 
     const arabicDays = ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
 
-    // In-memory data synced from Firebase
     let appData = {
       slots: {},
       users: {}
     };
 
-    // -------------------------------------------------------------
-    // Auto Calendar Calculation (7 upcoming days)
-    // -------------------------------------------------------------
     function getUpcomingWeek() {
       const week = [];
       const today = new Date();
-
       for (let i = 0; i < 7; i++) {
         const d = new Date(today);
         d.setDate(today.getDate() + i);
-
         const dayName = arabicDays[d.getDay()];
         const dayNumber = d.getDate();
         const monthNumber = d.getMonth() + 1;
         const formattedDate = `${dayNumber}/${monthNumber}`;
         const key = `${d.getFullYear()}-${String(monthNumber).padStart(2, '0')}-${String(dayNumber).padStart(2, '0')}`;
-
-        week.push({
-          key: key,
-          dayName: dayName,
-          dateStr: formattedDate,
-          isToday: i === 0
-        });
+        week.push({ key, dayName, dateStr: formattedDate, isToday: i === 0 });
       }
       return week;
     }
 
     const weekDays = getUpcomingWeek();
 
-    // -------------------------------------------------------------
-    // Firebase Listeners (Realtime Sync)
-    // -------------------------------------------------------------
     function setupFirebaseSync() {
-      // Listen to slots
       db.ref('slots').on('value', (snapshot) => {
         appData.slots = snapshot.val() || {};
         renderUI();
       });
 
-      // Listen to users
       db.ref('users').on('value', (snapshot) => {
         appData.users = snapshot.val() || {};
         renderAdminUsersList();
       });
 
-      // If DB is empty on first boot, initialize sample slots
       db.ref('slots').once('value').then((snap) => {
         if (!snap.exists()) {
           initializeDefaultSlots();
@@ -446,9 +443,6 @@
       db.ref('slots').set(initialSlots);
     }
 
-    // -------------------------------------------------------------
-    // Render Functions
-    // -------------------------------------------------------------
     function renderUI() {
       renderUserHeader();
       renderDaysTabs();
@@ -492,7 +486,6 @@
         const isSelected = activeDayIndex === index;
         const daySlotsObj = appData.slots[day.key] || {};
         const slotsArray = Object.values(daySlotsObj);
-
         const total = slotsArray.length;
         const availableCount = slotsArray.filter(s => s.status === 'available').length;
 
@@ -522,7 +515,6 @@
           containerClass += 'bg-slate-900/60 border-slate-800/80 text-slate-300 hover:border-slate-700 hover:bg-slate-900';
         }
 
-        // Today pill styling (red if booked/no slots, green if available)
         let todayPillClass = availableCount > 0 
           ? 'bg-emerald-500 text-slate-950 font-black' 
           : 'bg-rose-500 text-white font-black';
@@ -579,11 +571,9 @@
       slotsArray.forEach(slot => {
         const isMyBooking = currentUser && slot.bookedBy === currentUser.username;
         const isBooked = slot.status === 'booked';
-
         const card = document.createElement('div');
 
         if (isMyBooking) {
-          // --- USER'S OWN BOOKING CARD (Subtle Dark Amber Gradient) ---
           card.className = "rounded-3xl p-5 border border-amber-500/30 bg-gradient-to-br from-amber-950/35 via-slate-900 to-amber-950/20 shadow-xl transition-all relative overflow-hidden";
           card.innerHTML = `
             <div class="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-amber-400 to-yellow-500"></div>
@@ -606,13 +596,12 @@
               ${slot.topic ? `<p class="text-xs text-slate-300 mt-2 bg-slate-950/60 p-2.5 rounded-xl border border-slate-800/80">ملاحظتك: "${escapeHtml(slot.topic)}"</p>` : ''}
             </div>
 
-            <button onclick="cancelMySlot('${activeDay.key}', '${slot.id}')" class="w-full py-2.5 rounded-xl bg-amber-500/15 hover:bg-amber-400 hover:text-slate-950 text-amber-300 border border-amber-500/40 text-xs font-bold transition-all flex items-center justify-center gap-1.5">
+            <button onclick="promptCancelMySlot('${activeDay.key}', '${slot.id}')" class="w-full py-2.5 rounded-xl bg-amber-500/15 hover:bg-amber-400 hover:text-slate-950 text-amber-300 border border-amber-500/40 text-xs font-bold transition-all flex items-center justify-center gap-1.5">
               <i data-lucide="x-circle" class="w-4 h-4"></i>
               <span>إلغاء حجزي</span>
             </button>
           `;
         } else if (isBooked) {
-          // --- BOOKED BY SOMEONE ELSE (Subtle Dark Red Gradient) ---
           card.className = "rounded-3xl p-5 border border-rose-500/30 bg-gradient-to-br from-rose-950/35 via-slate-900 to-rose-950/20 shadow-xl transition-all relative overflow-hidden";
           
           let adminExtra = '';
@@ -625,7 +614,7 @@
                 </div>
                 <div class="text-slate-300">الحاجز: <span class="text-white font-bold">${escapeHtml(slot.bookedBy || 'بدون اسم')}</span></div>
                 ${slot.topic ? `<div class="text-slate-300">التوبيك: <span class="text-slate-200">"${escapeHtml(slot.topic)}"</span></div>` : ''}
-                <button onclick="adminFreeSlot('${activeDay.key}', '${slot.id}')" class="w-full mt-2 py-1.5 rounded-lg bg-rose-500 hover:bg-rose-600 text-white font-bold text-xs transition-all">
+                <button onclick="promptAdminFreeSlot('${activeDay.key}', '${slot.id}')" class="w-full mt-2 py-1.5 rounded-lg bg-rose-500 hover:bg-rose-600 text-white font-bold text-xs transition-all">
                   إلغاء وتفريغ المعاد
                 </button>
               </div>
@@ -660,13 +649,12 @@
             ${adminExtra}
           `;
         } else {
-          // --- AVAILABLE SLOT (Subtle Dark Emerald Gradient) ---
           card.className = "rounded-3xl p-5 border border-emerald-500/30 bg-gradient-to-br from-emerald-950/30 via-slate-900 to-emerald-950/15 shadow-xl hover:border-emerald-500/50 transition-all relative overflow-hidden";
           
           let adminDelete = '';
           if (isAdmin) {
             adminDelete = `
-              <button onclick="adminDeleteSlot('${activeDay.key}', '${slot.id}')" title="مسح الميعاد" class="text-slate-500 hover:text-rose-400 p-1 rounded-lg">
+              <button onclick="promptAdminDeleteSlot('${activeDay.key}', '${slot.id}')" title="مسح الميعاد" class="text-slate-500 hover:text-rose-400 p-1 rounded-lg">
                 <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
               </button>
             `;
@@ -704,12 +692,134 @@
     }
 
     // -------------------------------------------------------------
-    // Booking Handlers
+    // Custom Confirmation Modal UI
+    // -------------------------------------------------------------
+    function openConfirmModal(title, msg, onConfirm) {
+      document.getElementById('confirmTitle').textContent = title;
+      document.getElementById('confirmMessage').textContent = msg;
+      onConfirmCallback = onConfirm;
+
+      const yesBtn = document.getElementById('confirmYesBtn');
+      yesBtn.onclick = () => {
+        if (onConfirmCallback) onConfirmCallback();
+        closeConfirmModal();
+      };
+
+      document.getElementById('confirmModal').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function closeConfirmModal() {
+      document.getElementById('confirmModal').classList.add('hidden');
+      onConfirmCallback = null;
+    }
+
+    // -------------------------------------------------------------
+    // Custom Admin PIN Modal UI
+    // -------------------------------------------------------------
+    function openAdminPinModal() {
+      if (isAdmin) {
+        logoutAdmin();
+        return;
+      }
+      const input = document.getElementById('adminPinInput');
+      input.value = '';
+      document.getElementById('adminPinModal').classList.remove('hidden');
+      input.focus();
+      lucide.createIcons();
+    }
+
+    function closeAdminPinModal() {
+      document.getElementById('adminPinModal').classList.add('hidden');
+    }
+
+    function submitAdminPin() {
+      const pin = document.getElementById('adminPinInput').value.trim();
+      if (pin === ADMIN_PIN) {
+        isAdmin = true;
+        closeAdminPinModal();
+        document.getElementById('adminBanner').classList.remove('hidden');
+        document.getElementById('adminToggleBtn').innerHTML = `
+          <i data-lucide="shield-off" class="w-3.5 h-3.5 text-rose-400"></i>
+          <span>إغلاق الأدمن</span>
+        `;
+        renderUI();
+        showToast('تم تفعيل وضع الأدمن بنجاح 🛡️', 'success');
+      } else {
+        showToast('الرمز السري غير صحيح!', 'error');
+      }
+    }
+
+    document.getElementById('adminPinInput').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') submitAdminPin();
+    });
+
+    function logoutAdmin() {
+      isAdmin = false;
+      document.getElementById('adminBanner').classList.add('hidden');
+      document.getElementById('adminToggleBtn').innerHTML = `
+        <i data-lucide="shield" class="w-3.5 h-3.5 text-amber-400"></i>
+        <span>دخول الأدمن</span>
+      `;
+      renderUI();
+      showToast('تم الخروج من وضع الأدمن', 'info');
+    }
+
+    // -------------------------------------------------------------
+    // Slot Cancellation & Management (UI-Based)
+    // -------------------------------------------------------------
+    function promptCancelMySlot(dayKey, slotId) {
+      openConfirmModal(
+        'إلغاء حجز المعاد',
+        'هل أنت متأكد من رغبتك في إلغاء حجز هذا المعاد؟ سيصبح متاحاً لأي شخص آخر فوراً.',
+        () => {
+          db.ref(`slots/${dayKey}/${slotId}`).update({
+            status: 'available',
+            bookedBy: null,
+            topic: null,
+            bookedAt: null
+          }).then(() => {
+            showToast('تم إلغاء حجز المعاد وأصبح متاحاً للآخرين', 'success');
+          });
+        }
+      );
+    }
+
+    function promptAdminFreeSlot(dayKey, slotId) {
+      openConfirmModal(
+        'تفريغ المعاد (أدمن)',
+        'هل تريد إلغاء حجز هذا الشخص وتفريغ المعاد ليصبح متاحاً للجميع؟',
+        () => {
+          db.ref(`slots/${dayKey}/${slotId}`).update({
+            status: 'available',
+            bookedBy: null,
+            topic: null,
+            bookedAt: null
+          }).then(() => {
+            showToast('تم تفريغ المعاد بنجاح', 'success');
+          });
+        }
+      );
+    }
+
+    function promptAdminDeleteSlot(dayKey, slotId) {
+      openConfirmModal(
+        'حذف الميعاد نهائياً',
+        'هل أنت متأكد من مسح هذا الوقت تماماً من جدول اليوم؟',
+        () => {
+          db.ref(`slots/${dayKey}/${slotId}`).remove().then(() => {
+            showToast('تم حذف الميعاد من الجدول', 'success');
+          });
+        }
+      );
+    }
+
+    // -------------------------------------------------------------
+    // Booking
     // -------------------------------------------------------------
     function openBookingModal(slotId, slotTime) {
       selectedSlotId = slotId;
       document.getElementById('bookingModalTime').textContent = `الوقت: ${slotTime}`;
-      document.getElementById('bookingModalAuthAlert').classList.toggle('hidden', !!currentUser);
 
       const nameInput = document.getElementById('bookerNameInput');
       if (currentUser) {
@@ -754,21 +864,8 @@
       });
     }
 
-    function cancelMySlot(dayKey, slotId) {
-      if (!confirm('هل أنت متأكد من رغبتك في إلغاء حجز هذا المعاد؟')) return;
-
-      db.ref(`slots/${dayKey}/${slotId}`).update({
-        status: 'available',
-        bookedBy: null,
-        topic: null,
-        bookedAt: null
-      }).then(() => {
-        showToast('تم إلغاء حجز المعاد وأصبح متاحاً للآخرين', 'success');
-      });
-    }
-
     // -------------------------------------------------------------
-    // User Auth (Simple Firebase DB Based)
+    // User Auth
     // -------------------------------------------------------------
     function openAuthModal(mode = 'login') {
       switchAuthMode(mode);
@@ -851,7 +948,7 @@
     }
 
     // -------------------------------------------------------------
-    // User: My Bookings Modal
+    // User: My Bookings
     // -------------------------------------------------------------
     function openMyBookingsModal() {
       if (!currentUser) return;
@@ -872,7 +969,7 @@
                 <div class="text-xs font-bold text-white">${dayKey} - ${escapeHtml(s.time)}</div>
                 ${s.topic ? `<div class="text-[11px] text-slate-400">ملاحظة: ${escapeHtml(s.topic)}</div>` : ''}
               </div>
-              <button onclick="cancelMySlot('${dayKey}', '${slotId}')" class="px-3 py-1.5 rounded-xl bg-amber-500/10 text-amber-300 border border-amber-500/30 text-xs font-bold hover:bg-amber-400 hover:text-slate-950 transition-all">
+              <button onclick="promptCancelMySlot('${dayKey}', '${slotId}')" class="px-3 py-1.5 rounded-xl bg-amber-500/10 text-amber-300 border border-amber-500/30 text-xs font-bold hover:bg-amber-400 hover:text-slate-950 transition-all">
                 إلغاء
               </button>
             `;
@@ -899,60 +996,7 @@
     }
 
     // -------------------------------------------------------------
-    // Admin Mode & Password Prompt (PIN 3276)
-    // -------------------------------------------------------------
-    function toggleAdminPrompt() {
-      if (isAdmin) {
-        logoutAdmin();
-        return;
-      }
-      const pin = prompt('أدخل رمز الأدمن السري:');
-      if (pin === ADMIN_PIN) {
-        isAdmin = true;
-        document.getElementById('adminBanner').classList.remove('hidden');
-        document.getElementById('adminToggleBtn').innerHTML = `
-          <i data-lucide="shield-off" class="w-3.5 h-3.5 text-rose-400"></i>
-          <span>إغلاق الأدمن</span>
-        `;
-        renderUI();
-        showToast('تم تفعيل وضع الأدمن بنجاح 🛡️', 'success');
-      } else if (pin !== null) {
-        showToast('الرمز السري غير صحيح!', 'error');
-      }
-    }
-
-    function logoutAdmin() {
-      isAdmin = false;
-      document.getElementById('adminBanner').classList.add('hidden');
-      document.getElementById('adminToggleBtn').innerHTML = `
-        <i data-lucide="shield" class="w-3.5 h-3.5 text-amber-400"></i>
-        <span>دخول الأدمن</span>
-      `;
-      renderUI();
-      showToast('تم الخروج من وضع الأدمن', 'info');
-    }
-
-    function adminFreeSlot(dayKey, slotId) {
-      if (!confirm('هل تريد إلغاء حجز هذا المعاد وإتاحته للجميع مجدداً؟')) return;
-      db.ref(`slots/${dayKey}/${slotId}`).update({
-        status: 'available',
-        bookedBy: null,
-        topic: null,
-        bookedAt: null
-      }).then(() => {
-        showToast('تم تفريغ المعاد بنجاح', 'success');
-      });
-    }
-
-    function adminDeleteSlot(dayKey, slotId) {
-      if (!confirm('هل أنت متأكد من حذف هذا الوقت نهائياً من الجدول؟')) return;
-      db.ref(`slots/${dayKey}/${slotId}`).remove().then(() => {
-        showToast('تم حذف الميعاد من الجدول', 'success');
-      });
-    }
-
-    // -------------------------------------------------------------
-    // Admin: Add Slot
+    // Admin: Slots & Users Operations
     // -------------------------------------------------------------
     function openAddSlotModal() {
       const activeDay = weekDays[activeDayIndex];
@@ -986,9 +1030,6 @@
       });
     }
 
-    // -------------------------------------------------------------
-    // Admin: Manage Users
-    // -------------------------------------------------------------
     function openManageUsersModal() {
       renderAdminUsersList();
       document.getElementById('adminNewUser').value = '';
@@ -1023,7 +1064,7 @@
             <div class="font-bold text-white">${escapeHtml(username)}</div>
             <div class="text-[11px] text-slate-400 font-mono">باسورد: <span class="text-amber-300 font-bold">${escapeHtml(u.password || '---')}</span></div>
           </div>
-          <button onclick="adminDeleteUser('${escapeHtml(username)}')" class="px-2.5 py-1 rounded-lg bg-rose-500/10 hover:bg-rose-500 hover:text-white text-rose-400 text-[11px] font-bold transition-all">
+          <button onclick="promptAdminDeleteUser('${escapeHtml(username)}')" class="px-2.5 py-1 rounded-lg bg-rose-500/10 hover:bg-rose-500 hover:text-white text-rose-400 text-[11px] font-bold transition-all">
             حذف الحساب
           </button>
         `;
@@ -1050,15 +1091,20 @@
       });
     }
 
-    function adminDeleteUser(username) {
-      if (!confirm(`هل أنت متأكد من حذف حساب ${username}؟`)) return;
-      db.ref(`users/${username}`).remove().then(() => {
-        showToast(`تم حذف حساب ${username}`, 'info');
-      });
+    function promptAdminDeleteUser(username) {
+      openConfirmModal(
+        'حذف الحساب',
+        `هل أنت متأكد من حذف حساب ${username} نهائياً؟`,
+        () => {
+          db.ref(`users/${username}`).remove().then(() => {
+            showToast(`تم حذف حساب ${username}`, 'info');
+          });
+        }
+      );
     }
 
     // -------------------------------------------------------------
-    // Utilities
+    // Toast Notification
     // -------------------------------------------------------------
     function showToast(msg, type = 'info') {
       const toast = document.getElementById('toast');
@@ -1076,7 +1122,6 @@
       }
 
       lucide.createIcons();
-
       toast.classList.remove('opacity-0', 'pointer-events-none');
       setTimeout(() => {
         toast.classList.add('opacity-0', 'pointer-events-none');
@@ -1093,9 +1138,6 @@
         .replace(/'/g, "&#039;");
     }
 
-    // -------------------------------------------------------------
-    // App Initialization
-    // -------------------------------------------------------------
     window.addEventListener('DOMContentLoaded', () => {
       setupFirebaseSync();
     });
