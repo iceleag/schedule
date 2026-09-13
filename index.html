@@ -135,7 +135,7 @@
         <i data-lucide="calendar-days" class="w-4 h-4 text-emerald-400"></i>
         <span>اختر اليوم لعرض وحجز المواعيد:</span>
       </div>
-      <div id="daysContainer" class="flex items-center gap-2.5 overflow-x-auto pb-3 pt-1 px-1 custom-scrollbar"></div>
+      <div id="daysContainer" class="flex items-center gap-2.5 overflow-x-auto pb-4 pt-2 px-1 custom-scrollbar"></div>
     </div>
 
     <!-- Active Day Header -->
@@ -183,9 +183,9 @@
     </div>
   </div>
 
-  <!-- Custom Confirmation Dialog Modal -->
-  <div id="confirmModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
-    <div class="bg-slate-900 border border-slate-700/80 rounded-3xl max-w-sm w-full p-6 shadow-2xl relative text-center">
+  <!-- Custom Confirmation Dialog Modal (Elevated z-index to always stay on top) -->
+  <div id="confirmModal" class="fixed inset-0 z-[70] bg-slate-950/85 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+    <div class="bg-slate-900 border border-slate-700/90 rounded-3xl max-w-sm w-full p-6 shadow-2xl relative text-center">
       <div class="w-12 h-12 mx-auto rounded-2xl bg-rose-500/20 text-rose-400 flex items-center justify-center border border-rose-500/30 mb-3">
         <i data-lucide="alert-triangle" class="w-6 h-6"></i>
       </div>
@@ -222,8 +222,8 @@
 
       <div class="space-y-4">
         <div>
-          <label class="block text-xs font-bold text-slate-300 mb-1.5">اسمك أو لقبك</label>
-          <input type="text" id="bookerNameInput" placeholder="اكتب اسمك هنا..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-500 transition-all">
+          <label class="block text-xs font-bold text-slate-300 mb-1.5">الحجز باسم</label>
+          <input type="text" id="bookerNameInput" disabled class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-emerald-400 font-bold opacity-90 cursor-not-allowed">
         </div>
         <div>
           <label class="block text-xs font-bold text-slate-300 mb-1.5">ملاحظة / هنقعد فين أو نعمل إيه؟ (اختياري)</label>
@@ -247,29 +247,29 @@
 
       <div class="text-center mb-6">
         <div class="w-12 h-12 mx-auto rounded-2xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center border border-indigo-500/30 mb-2">
-          <i data-lucide="user-check" class="w-6 h-6"></i>
+          <i data-lucide="user-plus" id="authHeaderIcon" class="w-6 h-6"></i>
         </div>
-        <h3 id="authModalTitle" class="text-lg font-bold text-white">تسجيل الدخول</h3>
-        <p class="text-xs text-slate-400 mt-1">عشان تتابع وتلغي مواعيدك بنفسك في أي وقت</p>
+        <h3 id="authModalTitle" class="text-lg font-bold text-white">إنشاء حساب جديد</h3>
+        <p id="authModalSub" class="text-xs text-slate-400 mt-1">سجل حسابك في ثواني عشان تحجز وتتحكم في مواعيدك</p>
       </div>
 
       <div class="flex p-1 bg-slate-950 rounded-xl mb-4 border border-slate-800">
-        <button id="authTabLogin" onclick="switchAuthMode('login')" class="flex-1 py-1.5 text-xs font-bold rounded-lg bg-indigo-600 text-white transition-all">دخول</button>
-        <button id="authTabRegister" onclick="switchAuthMode('register')" class="flex-1 py-1.5 text-xs font-bold rounded-lg text-slate-400 hover:text-white transition-all">حساب جديد</button>
+        <button id="authTabRegister" onclick="switchAuthMode('register')" class="flex-1 py-1.5 text-xs font-bold rounded-lg bg-indigo-600 text-white transition-all">حساب جديد</button>
+        <button id="authTabLogin" onclick="switchAuthMode('login')" class="flex-1 py-1.5 text-xs font-bold rounded-lg text-slate-400 hover:text-white transition-all">تسجيل دخول</button>
       </div>
 
       <div class="space-y-3.5">
         <div>
-          <label class="block text-xs font-bold text-slate-300 mb-1">اسم المستخدم</label>
-          <input type="text" id="authUsernameInput" placeholder="اكتب اسمك..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500">
+          <label class="block text-xs font-bold text-slate-300 mb-1">اسمك (اسم المستخدم)</label>
+          <input type="text" id="authUsernameInput" placeholder="اكتب اسمك هنا..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500">
         </div>
         <div>
-          <label class="block text-xs font-bold text-slate-300 mb-1">كلمة المرور</label>
+          <label class="block text-xs font-bold text-slate-300 mb-1">كلمة المرور (عشان محدش يدخل بـ اسمك)</label>
           <input type="password" id="authPasswordInput" placeholder="••••••••" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500">
         </div>
 
         <button id="authSubmitBtn" onclick="submitAuth()" class="w-full py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm transition-all shadow-lg shadow-indigo-600/20 mt-2">
-          تسجيل الدخول
+          إنشاء الحساب ومتابعة الحجز
         </button>
       </div>
     </div>
@@ -363,7 +363,7 @@
     <span id="toastMsg"></span>
   </div>
 
-  <!-- Scripts -->
+  <!-- Logic & Firebase -->
   <script>
     const firebaseConfig = {
       apiKey: "AIzaSyCv5MDv3LI0twtcvvRfcQ85dq8A5AXuW1E",
@@ -383,7 +383,9 @@
     let currentUser = JSON.parse(localStorage.getItem('schedule_current_user') || 'null');
     let activeDayIndex = 0;
     let selectedSlotId = null;
-    let authMode = 'login';
+    let selectedSlotTime = null;
+    let pendingDayKey = null;
+    let authMode = 'register';
     let onConfirmCallback = null;
 
     const arabicDays = ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
@@ -470,9 +472,9 @@
         `;
       } else {
         container.innerHTML = `
-          <button onclick="openAuthModal('login')" class="text-xs font-bold px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white transition-all flex items-center gap-1.5 shadow-lg shadow-indigo-600/20">
-            <i data-lucide="user" class="w-3.5 h-3.5"></i>
-            <span>تسجيل / دخول</span>
+          <button onclick="openAuthModal('register')" class="text-xs font-bold px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white transition-all flex items-center gap-1.5 shadow-lg shadow-indigo-600/20">
+            <i data-lucide="user-plus" class="w-3.5 h-3.5"></i>
+            <span>تسجيل حساب</span>
           </button>
         `;
       }
@@ -503,7 +505,7 @@
           statusBadgeClass = 'bg-emerald-500/10 text-emerald-300 border border-emerald-500/20';
         }
 
-        let containerClass = 'flex-shrink-0 min-w-[5.8rem] h-[5.4rem] rounded-2xl flex flex-col items-center justify-center p-2 transition-all cursor-pointer select-none border relative ';
+        let containerClass = 'flex-shrink-0 min-w-[5.8rem] min-h-[5.8rem] rounded-2xl flex flex-col items-center justify-between py-2 px-1.5 transition-all cursor-pointer select-none border relative ';
 
         if (isSelected) {
           if (availableCount > 0) {
@@ -527,10 +529,14 @@
         };
 
         btn.innerHTML = `
-          ${day.isToday ? `<span class="absolute -top-2.5 px-2 py-0.5 rounded-full text-[10px] shadow-md ${todayPillClass}">اليوم</span>` : ''}
-          <span class="text-xs font-bold mt-1">${day.dayName}</span>
-          <span class="text-[11px] text-slate-400 font-mono">${day.dateStr}</span>
-          <span class="text-[9px] px-1.5 py-0.5 rounded-md font-bold mt-1 ${statusBadgeClass}">${statusText}</span>
+          <div class="h-4 flex items-center justify-center">
+            ${day.isToday ? `<span class="px-2 py-0.5 rounded-full text-[9px] font-black leading-none tracking-tight shadow-sm ${todayPillClass}">اليوم</span>` : ''}
+          </div>
+          <div class="flex flex-col items-center justify-center my-0.5">
+            <span class="text-xs font-bold leading-tight">${day.dayName}</span>
+            <span class="text-[11px] text-slate-400 font-mono leading-tight">${day.dateStr}</span>
+          </div>
+          <span class="text-[9px] px-1.5 py-0.5 rounded-md font-bold leading-tight ${statusBadgeClass}">${statusText}</span>
         `;
         container.appendChild(btn);
       });
@@ -680,7 +686,7 @@
               <h4 class="text-base font-black text-white">معاد متاح</h4>
             </div>
 
-            <button onclick="openBookingModal('${slot.id}', '${escapeHtml(slot.time)}')" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:opacity-95 text-slate-950 font-black text-xs transition-all shadow-md shadow-emerald-500/20 flex items-center justify-center gap-1.5">
+            <button onclick="handleBookingClick('${activeDay.key}', '${slot.id}', '${escapeHtml(slot.time)}')" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:opacity-95 text-slate-950 font-black text-xs transition-all shadow-md shadow-emerald-500/20 flex items-center justify-center gap-1.5">
               <i data-lucide="calendar-plus" class="w-4 h-4 stroke-[2.5]"></i>
               <span>احجز المعاد ده معايا</span>
             </button>
@@ -692,7 +698,65 @@
     }
 
     // -------------------------------------------------------------
-    // Custom Confirmation Modal UI
+    // Intelligent Booking Trigger
+    // -------------------------------------------------------------
+    function handleBookingClick(dayKey, slotId, slotTime) {
+      if (!currentUser) {
+        pendingDayKey = dayKey;
+        selectedSlotId = slotId;
+        selectedSlotTime = slotTime;
+        showToast('لازم تعمل حساب الأول عشان تقدر تحجز وتلغي بنفسك', 'info');
+        openAuthModal('register');
+        return;
+      }
+
+      pendingDayKey = dayKey;
+      openBookingModal(slotId, slotTime);
+    }
+
+    function openBookingModal(slotId, slotTime) {
+      selectedSlotId = slotId;
+      selectedSlotTime = slotTime;
+      document.getElementById('bookingModalTime').textContent = `الوقت: ${slotTime}`;
+      document.getElementById('bookerNameInput').value = currentUser ? currentUser.username : '';
+      document.getElementById('bookerTopicInput').value = '';
+
+      document.getElementById('bookingModal').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function closeBookingModal() {
+      document.getElementById('bookingModal').classList.add('hidden');
+      selectedSlotId = null;
+      selectedSlotTime = null;
+      pendingDayKey = null;
+    }
+
+    function confirmBooking() {
+      const activeDay = pendingDayKey ? weekDays.find(d => d.key === pendingDayKey) : weekDays[activeDayIndex];
+      const topic = document.getElementById('bookerTopicInput').value.trim();
+
+      if (!currentUser) {
+        showToast('يرجى تسجيل الدخول أولاً', 'error');
+        return;
+      }
+
+      const slotRef = db.ref(`slots/${activeDay.key}/${selectedSlotId}`);
+      slotRef.update({
+        status: 'booked',
+        bookedBy: currentUser.username,
+        topic: topic || '',
+        bookedAt: Date.now()
+      }).then(() => {
+        closeBookingModal();
+        showToast('تم حجز المعاد بنجاح! نتقابل على خير 🎉', 'success');
+      }).catch(err => {
+        showToast('حدث خطأ أثناء الحجز، حاول مجدداً', 'error');
+      });
+    }
+
+    // -------------------------------------------------------------
+    // Custom Confirmation Dialog UI
     // -------------------------------------------------------------
     function openConfirmModal(title, msg, onConfirm) {
       document.getElementById('confirmTitle').textContent = title;
@@ -766,7 +830,7 @@
     }
 
     // -------------------------------------------------------------
-    // Slot Cancellation & Management (UI-Based)
+    // Slot Actions
     // -------------------------------------------------------------
     function promptCancelMySlot(dayKey, slotId) {
       openConfirmModal(
@@ -815,59 +879,9 @@
     }
 
     // -------------------------------------------------------------
-    // Booking
+    // Auth Handlers
     // -------------------------------------------------------------
-    function openBookingModal(slotId, slotTime) {
-      selectedSlotId = slotId;
-      document.getElementById('bookingModalTime').textContent = `الوقت: ${slotTime}`;
-
-      const nameInput = document.getElementById('bookerNameInput');
-      if (currentUser) {
-        nameInput.value = currentUser.username;
-        nameInput.disabled = true;
-      } else {
-        nameInput.value = '';
-        nameInput.disabled = false;
-      }
-      document.getElementById('bookerTopicInput').value = '';
-
-      document.getElementById('bookingModal').classList.remove('hidden');
-      lucide.createIcons();
-    }
-
-    function closeBookingModal() {
-      document.getElementById('bookingModal').classList.add('hidden');
-      selectedSlotId = null;
-    }
-
-    function confirmBooking() {
-      const activeDay = weekDays[activeDayIndex];
-      const name = document.getElementById('bookerNameInput').value.trim();
-      const topic = document.getElementById('bookerTopicInput').value.trim();
-
-      if (!name) {
-        showToast('يرجى كتابة اسمك لتأكيد الحجز!', 'error');
-        return;
-      }
-
-      const slotRef = db.ref(`slots/${activeDay.key}/${selectedSlotId}`);
-      slotRef.update({
-        status: 'booked',
-        bookedBy: name,
-        topic: topic || '',
-        bookedAt: Date.now()
-      }).then(() => {
-        closeBookingModal();
-        showToast('تم حجز المعاد بنجاح! نتقابل على خير 🎉', 'success');
-      }).catch(err => {
-        showToast('حدث خطأ أثناء الحجز، حاول مجدداً', 'error');
-      });
-    }
-
-    // -------------------------------------------------------------
-    // User Auth
-    // -------------------------------------------------------------
-    function openAuthModal(mode = 'login') {
+    function openAuthModal(mode = 'register') {
       switchAuthMode(mode);
       document.getElementById('authUsernameInput').value = '';
       document.getElementById('authPasswordInput').value = '';
@@ -884,19 +898,26 @@
       const tabLogin = document.getElementById('authTabLogin');
       const tabReg = document.getElementById('authTabRegister');
       const title = document.getElementById('authModalTitle');
+      const sub = document.getElementById('authModalSub');
       const submit = document.getElementById('authSubmitBtn');
+      const icon = document.getElementById('authHeaderIcon');
 
       if (mode === 'login') {
         tabLogin.className = 'flex-1 py-1.5 text-xs font-bold rounded-lg bg-indigo-600 text-white transition-all';
         tabReg.className = 'flex-1 py-1.5 text-xs font-bold rounded-lg text-slate-400 hover:text-white transition-all';
         title.textContent = 'تسجيل الدخول';
-        submit.textContent = 'تسجيل الدخول';
+        sub.textContent = 'أهلاً بعودتك! ادخل اسمك وباسوردك';
+        submit.textContent = 'تسجيل الدخول ومتابعة الحجز';
+        icon.setAttribute('data-lucide', 'user-check');
       } else {
         tabReg.className = 'flex-1 py-1.5 text-xs font-bold rounded-lg bg-indigo-600 text-white transition-all';
         tabLogin.className = 'flex-1 py-1.5 text-xs font-bold rounded-lg text-slate-400 hover:text-white transition-all';
         title.textContent = 'إنشاء حساب جديد';
-        submit.textContent = 'إنشاء الحساب فوراً';
+        sub.textContent = 'سجل حسابك في ثواني عشان تحجز وتتحكم في مواعيدك';
+        submit.textContent = 'إنشاء الحساب ومتابعة الحجز';
+        icon.setAttribute('data-lucide', 'user-plus');
       }
+      lucide.createIcons();
     }
 
     function submitAuth() {
@@ -904,14 +925,14 @@
       const p = document.getElementById('authPasswordInput').value.trim();
 
       if (!u || !p) {
-        showToast('يرجى ملء اسم المستخدم وكلمة المرور', 'error');
+        showToast('يرجى كتابة اسم المستخدم وكلمة المرور', 'error');
         return;
       }
 
       if (authMode === 'register') {
         db.ref(`users/${u}`).once('value').then(snap => {
           if (snap.exists()) {
-            showToast('اسم المستخدم مسجل بالفعل، اختر اسماً آخر', 'error');
+            showToast('اسم المستخدم ده محجوز، جرب اسم تاني أو سجل دخول', 'error');
           } else {
             db.ref(`users/${u}`).set({
               password: p,
@@ -921,7 +942,13 @@
               localStorage.setItem('schedule_current_user', JSON.stringify(currentUser));
               closeAuthModal();
               renderUI();
-              showToast(`أهلاً بك يا ${u}! تم إنشاء الحساب بنجاح`, 'success');
+              showToast(`أهلاً بيك يا ${u}! تم إنشاء حسابك`, 'success');
+
+              if (selectedSlotId && selectedSlotTime) {
+                setTimeout(() => {
+                  openBookingModal(selectedSlotId, selectedSlotTime);
+                }, 300);
+              }
             });
           }
         });
@@ -933,6 +960,12 @@
             closeAuthModal();
             renderUI();
             showToast(`تم تسجيل الدخول بنجاح! مرحباً ${u}`, 'success');
+
+            if (selectedSlotId && selectedSlotTime) {
+              setTimeout(() => {
+                openBookingModal(selectedSlotId, selectedSlotTime);
+              }, 300);
+            }
           } else {
             showToast('اسم المستخدم أو كلمة المرور غير صحيحة', 'error');
           }
@@ -996,7 +1029,7 @@
     }
 
     // -------------------------------------------------------------
-    // Admin: Slots & Users Operations
+    // Admin: Slots & Users
     // -------------------------------------------------------------
     function openAddSlotModal() {
       const activeDay = weekDays[activeDayIndex];
@@ -1094,7 +1127,7 @@
     function promptAdminDeleteUser(username) {
       openConfirmModal(
         'حذف الحساب',
-        `هل أنت متأكد من حذف حساب ${username} نهائياً؟`,
+        `هل أنت متأكد من حذف حساب "${username}" نهائياً؟`,
         () => {
           db.ref(`users/${username}`).remove().then(() => {
             showToast(`تم حذف حساب ${username}`, 'info');
